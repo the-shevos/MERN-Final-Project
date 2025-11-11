@@ -1,6 +1,9 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
+import crypto from "crypto";
+
 import { User } from "../model/User";
+import { sendVerificationEmail } from "../utills/send-email";
 
 export const createUser = async (
   req: Request,
@@ -16,15 +19,18 @@ export const createUser = async (
     }
 
     const hashedPassword = await bcrypt.hash(userPassword, 10);
+    const verifyToken = crypto.randomBytes(32).toString("hex");
 
     const user = new User({
       userName,
       userEmail,
       userPassword: hashedPassword,
       role,
+      verifyToken,
     });
 
     await user.save();
+    sendVerificationEmail(userEmail, verifyToken);
 
     res.status(201).json({ message: "User created successfully" });
   } catch (err: any) {
