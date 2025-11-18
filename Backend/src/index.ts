@@ -4,12 +4,13 @@ import dotenv from "dotenv";
 import cors from "cors";
 
 import userRegisterRouter from "./routes/user-register-router";
+import userLoginRouter from "./routes/user-login-router";
 
 dotenv.config();
 
 const app = express();
 
-app.use(cors());
+app.use(cors({ origin: "http://localhost:5173" }));
 
 const mongoURI = process.env.MONGO_URI || "";
 
@@ -22,6 +23,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/v1/user", userRegisterRouter);
+app.use("/api/v1/user", userLoginRouter);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

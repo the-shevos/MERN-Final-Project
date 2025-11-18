@@ -71,3 +71,70 @@ export async function sendVerificationEmail(
     console.error("Error sending email:", error);
   }
 }
+
+export async function sendPasswordResetEmail(
+  email: string,
+  resetLink: string
+): Promise<void> {
+  const gmailUser = process.env.GMAIL_USER;
+  const gmailPass = process.env.GMAIL_PASS;
+
+  if (!gmailUser || !gmailPass) {
+    console.error("GMAIL_USER or GMAIL_PASS is not defined in .env");
+    return;
+  }
+
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: gmailUser,
+      pass: gmailPass,
+    },
+  });
+
+  const mailOptions = {
+    from: `"My App" <${gmailUser}>`,
+    to: email,
+    subject: "Reset Your Password",
+    html: `
+      <div style="font-family: Arial, sans-serif; text-align: center; padding: 40px; background-color: #f9f9f9;">
+        <h1 style="color: #6A1B9A; font-size: 28px; margin-bottom: 20px;">
+          Reset Your Password
+        </h1>
+
+        <p style="font-size: 16px; color: #333; max-width: 550px; margin: 0 auto 30px auto;">
+          We received a request to reset your password.
+          Click the button below to choose a new one.
+          This link is valid for 1 hour.
+        </p>
+
+        <a href="${resetLink}"
+           style="
+             display: inline-block;
+             padding: 15px 35px;
+             background-color: #8E24AA;
+             color: #fff;
+             border-radius: 10px;
+             font-size: 18px;
+             font-weight: bold;
+             text-decoration: none;
+             box-shadow: 0 5px 10px rgba(0,0,0,0.15);
+           "
+           target="_blank">
+          Reset Password
+        </a>
+
+        <p style="font-size: 14px; color: #555; margin-top: 25px;">
+          If you did not request a password reset, please ignore this email.
+        </p>
+      </div>
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log("Password reset email sent to:", email);
+  } catch (error) {
+    console.error("Error sending password reset email:", error);
+  }
+}

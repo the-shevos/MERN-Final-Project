@@ -23,4 +23,28 @@ router.get("/verify-email", async (req, res) => {
   }
 });
 
+router.get("/check-username", async (req, res) => {
+  try {
+    const userName = req.query.userName as string;
+    if (!userName) return res.status(400).json({ available: false });
+
+    const existingUser = await User.findOne({ userName });
+    res.json({ available: !existingUser });
+  } catch (err: any) {
+    res.status(500).json({ available: false });
+  }
+});
+
+router.get("/check-email", async (req, res) => {
+  try {
+    const userEmail = req.query.userEmail as string;
+    if (!userEmail) return res.status(400).json({ available: false });
+
+    const existingUser = await User.findOne({ userEmail });
+    res.json({ available: !existingUser });
+  } catch (err: any) {
+    res.status(500).json({ available: false });
+  }
+});
+
 export default router;

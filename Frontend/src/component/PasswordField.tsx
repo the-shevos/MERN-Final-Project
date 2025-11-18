@@ -41,8 +41,9 @@ export default function PasswordField({
     <span className="inline-flex items-center w-4 h-4 mr-2">
       <FontAwesomeIcon
         icon={isValid ? faCheck : faXmark}
-        className={isValid ? "text-green-500" : "text-red-500"}
-        size="sm"
+        className={`font-bold ${
+          isValid ? "text-green-500" : "text-red-500"
+        } text-[13px]`}
       />
     </span>
   );
@@ -59,7 +60,7 @@ export default function PasswordField({
           onChange={onChange}
           onFocus={onFocus}
           onBlur={onBlur}
-          className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black pr-10"
+          className="w-full mt-1 border border-purple-300 focus:ring-purple-500 rounded-lg px-3 py-2 focus:outline-none focus:ring-2  pr-10"
           required
         />
         <button
@@ -71,15 +72,15 @@ export default function PasswordField({
         </button>
       </div>
       <ul className={validationClass(focused)}>
-        <li className="flex items-center">
+        <li className="flex items-center px-2 py-1 mb-1 rounded text-gray-900 font-medium bg-zinc-200/80">
           {renderValidationDot(validation.minLength)}
           Minimum 8 characters
         </li>
-        <li className="flex items-center">
+        <li className="flex items-center px-2 py-1 mb-1 rounded text-gray-900 font-medium bg-zinc-200/80">
           {renderValidationDot(validation.alphanumeric)}
           Must have letters & numbers
         </li>
-        <li className="flex items-center">
+        <li className="flex items-center px-2 py-1 mb-1 rounded text-gray-900 font-medium bg-zinc-200/80">
           {renderValidationDot(validation.specialChar)}
           Must include special character (!@#$%^&*)
         </li>

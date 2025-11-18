@@ -38,8 +38,9 @@ export default function InputField({
     <span className="inline-flex items-center w-4 h-4 mr-2">
       <FontAwesomeIcon
         icon={isValid ? faCheck : faXmark}
-        className={isValid ? "text-green-500" : "text-red-500"}
-        size="sm"
+        className={`font-bold ${
+          isValid ? "text-green-500" : "text-red-500"
+        } text-[13px]`}
       />
     </span>
   );
@@ -55,12 +56,15 @@ export default function InputField({
         onChange={onChange}
         onFocus={onFocus}
         onBlur={onBlur}
-        className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+        className="w-full mt-1 border border-purple-300 focus:ring-purple-500 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 "
         required
       />
       <ul className={validationClass(focused)}>
         {Object.keys(validation).map((key, idx) => (
-          <li key={key} className="flex items-center">
+          <li
+            key={key}
+            className={`flex items-center px-2 py-1 mb-1 rounded text-gray-900 font-medium bg-zinc-200/80`}
+          >
             {renderValidationDot(validation[key])}
             {validationLabels[idx]}
           </li>
