@@ -41,3 +41,24 @@ export const createUser = async (
     }
   }
 };
+
+export const getVerifiedUsers = async (req: Request, res: Response) => {
+  try {
+    const users = await User.find({
+      isEmailVerified: true,
+      role: { $ne: "admin" },
+    }).select("userName userEmail role isBlocked createdAt");
+
+    res.status(200).json({
+      success: true,
+      message: "Verified users fetched successfully",
+      users,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: "Error fetching verified users",
+      error: error.message,
+    });
+  }
+};

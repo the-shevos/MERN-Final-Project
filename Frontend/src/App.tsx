@@ -5,6 +5,7 @@ import AuthPage from "./page/AuthPage";
 import Dashboard from "./page/Dashboard";
 import SupportPage from "./page/SupportPage";
 import DashboardHome from "./page/DashboardHome";
+import Members from "./page/Members";
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
         <Route path="/dashboard" element={<Dashboard />}>
           <Route index element={<DashboardHome />} />
           <Route path="support" element={<SupportPage />} />
+          <Route path="members" element={<Members />} />
         </Route>
       </Routes>
     </Router>

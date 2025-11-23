@@ -18,7 +18,7 @@ import { faCalendar as faCalendarRegular } from "@fortawesome/free-regular-svg-i
 
 const Dashboard = () => {
   const location = useLocation();
-  const isActive = (path) => location.pathname === path;
+  const isActive = (path: string) => location.pathname === path;
 
   useEffect(() => {
     const cards = document.querySelectorAll("#card-container > div");
@@ -149,9 +149,13 @@ min-h-screen flex"
             Contact Support
           </Link>
 
-          <a
-            href="#"
-            className="flex items-center gap-3 px-4 py-2 rounded-xl text-sm text-gray-600 hover:bg-gray-200"
+          <Link
+            to="members"
+            className={`flex items-center gap-3 px-4 py-2 rounded-xl text-sm ${
+              isActive("/dashboard/members")
+                ? "bg-slate-800 text-white"
+                : "text-gray-600 hover:bg-gray-200"
+            }`}
           >
             <svg
               className="w-5 h-5"
@@ -167,7 +171,7 @@ min-h-screen flex"
               />
             </svg>
             Members
-          </a>
+          </Link>
         </nav>
         <div className="mb-3 flex flex-col items-center gap-2 border-t-2 border-gray-300 pt-4">
           <img

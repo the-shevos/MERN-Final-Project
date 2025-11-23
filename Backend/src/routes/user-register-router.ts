@@ -1,6 +1,9 @@
 import express from "express";
 import { User } from "../model/User";
-import { createUser } from "../controller/user-register-controller";
+import {
+  createUser,
+  getVerifiedUsers,
+} from "../controller/user-register-controller";
 const router = express.Router();
 
 router.post("/register", createUser);
@@ -151,6 +154,34 @@ router.get("/check-email", async (req, res) => {
     res.json({ available: !existingUser });
   } catch (err: any) {
     res.status(500).json({ available: false });
+  }
+});
+
+router.get("/verified-users", getVerifiedUsers);
+
+router.patch("/block-user/:id", async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { isBlocked: true },
+      { new: true }
+    );
+    res.json({ success: true, message: "User blocked", user });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+router.patch("/unblock-user/:id", async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { isBlocked: false },
+      { new: true }
+    );
+    res.json({ success: true, message: "User unblocked", user });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
   }
 });
 

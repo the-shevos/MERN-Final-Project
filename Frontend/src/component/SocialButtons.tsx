@@ -15,7 +15,6 @@ export default function SocialButtons() {
         }
       }
     );
-
     return () => {
       authListener.subscription.unsubscribe();
     };
