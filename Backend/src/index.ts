@@ -5,6 +5,7 @@ import cors from "cors";
 
 import userRegisterRouter from "./routes/user-register-router";
 import userLoginRouter from "./routes/user-login-router";
+import contactRouter from "./routes/contact-routes";
 
 dotenv.config();
 
@@ -29,6 +30,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/v1/user", userRegisterRouter);
 app.use("/api/v1/user", userLoginRouter);
+app.use("/api/v1/contact", contactRouter);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

@@ -3,14 +3,14 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+const gmailUser = process.env.GMAIL_USER;
+const gmailPass = process.env.GMAIL_PASS;
+const port = process.env.PORT || "3000";
+
 export async function sendVerificationEmail(
   toEmail: string,
   token: string
 ): Promise<void> {
-  const gmailUser = process.env.GMAIL_USER;
-  const gmailPass = process.env.GMAIL_PASS;
-  const port = process.env.PORT || "3000";
-
   if (!gmailUser || !gmailPass) {
     console.error("GMAIL_USER or GMAIL_PASS is not defined in .env");
     return;
@@ -137,4 +137,89 @@ export async function sendPasswordResetEmail(
   } catch (error) {
     console.error("Error sending password reset email:", error);
   }
+}
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: gmailUser,
+    pass: gmailPass,
+  },
+});
+
+async function sendEmail(to: string, subject: string, html: string) {
+  try {
+    await transporter.sendMail({
+      from: `"My App" <${process.env.GMAIL_USER}>`,
+      to,
+      subject,
+      html,
+    });
+    console.log(`Email sent to ${to}`);
+  } catch (err) {
+    console.error("Error sending email:", err);
+  }
+}
+
+export async function sendReplyEmail(
+  toEmail: string,
+  userName: string,
+  message: string
+) {
+  const htmlContent = `
+  <html>
+    <body style="margin:0; padding:0; font-family: 'Helvetica', Arial, sans-serif; background-color:#f3f0f7;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="padding: 40px 0;">
+        <tr>
+          <td align="center">
+            <table width="600" cellpadding="0" cellspacing="0" style="background:#fff; border-radius:12px; box-shadow:0 10px 20px rgba(0,0,0,0.1); overflow:hidden;">
+              <tr>
+                <td style="background: linear-gradient(90deg, #8E24AA, #BA68C8); text-align:center; padding:25px;">
+                  <h1 style="margin:0; color:#fff; font-size:28px;">Support Reply</h1>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:30px; color:#333;">
+                  <p style="font-size:16px;">Hi <strong>${userName}</strong>,</p>
+                  <p style="font-size:16px;">Our support team has replied to your request. See the message below:</p>
+                  <div style="background:#f4e6fa; border-left:5px solid #8E24AA; padding:20px; border-radius:8px; font-size:15px; line-height:1.6; color:#4b0082; margin:20px 0;">
+                    ${message}
+                  </div>
+                  <div style="text-align:center; margin:30px 0;">
+                    <a href="mailto:${toEmail}" 
+                      style="
+                        display:inline-block;
+                        background:#8E24AA;
+                        color:#fff;
+                        text-decoration:none;
+                        padding:12px 25px;
+                        border-radius:8px;
+                        font-weight:bold;
+                        font-size:16px;
+                        box-shadow:0 5px 15px rgba(0,0,0,0.15);
+                        transition: all 0.3s ease;
+                      "
+                      target="_blank"
+                    >
+                      Reply to Support
+                    </a>
+                  </div>
+                  <p style="font-size:16px;">If you have further questions, feel free to reply to this email.</p>
+                  <p style="margin-top:30px; font-size:16px;">Best regards,<br><strong>My App Support Team</strong></p>
+                </td>
+              </tr>
+              <tr>
+                <td style="background:#8E24AA; color:#fff; text-align:center; padding:15px; font-size:14px;">
+                  &copy; ${new Date().getFullYear()} My App. All rights reserved.
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+  </html>
+  `;
+
+  await sendEmail(toEmail, "Reply from Support Team", htmlContent);
 }
