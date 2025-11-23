@@ -2,10 +2,13 @@ import React, { useState, useEffect, useRef } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import InputField from "./InputField";
 import PasswordField from "./PasswordField";
-import SocialButtons from "./SocialButtons";
 import axios from "axios";
 
-export default function RegisterForm() {
+interface RegisterFormProps {
+  onSignInClick?: () => void;
+}
+
+export default function RegisterForm({ onSignInClick }: RegisterFormProps) {
   const [formData, setFormData] = useState({
     userName: "",
     userEmail: "",
@@ -21,8 +24,8 @@ export default function RegisterForm() {
   });
 
   const [uniqueValidation, setUniqueValidation] = useState({
-    userName: true,
-    userEmail: true,
+    userName: false,
+    userEmail: false,
   });
 
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -33,16 +36,12 @@ export default function RegisterForm() {
   const handleFocus = (e: React.FocusEvent<HTMLInputElement>) =>
     setFocused({ ...focused, [e.target.name]: true });
 
-  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    const { name } = e.target;
-    setFocused({ ...focused, [name]: false });
-  };
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) =>
+    setFocused({ ...focused, [e.target.name]: false });
 
   useEffect(() => {
     if (formData.userName.trim().length < 3) return;
-
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-
     typingTimeoutRef.current = setTimeout(async () => {
       try {
         const res = await axios.get(
@@ -60,9 +59,7 @@ export default function RegisterForm() {
 
   useEffect(() => {
     if (!formData.userEmail.trim()) return;
-
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-
     typingTimeoutRef.current = setTimeout(async () => {
       try {
         const res = await axios.get(
@@ -83,7 +80,6 @@ export default function RegisterForm() {
     const validCharacters = /^[A-Za-z0-9]+$/.test(name);
     const unique =
       minLength && validCharacters ? uniqueValidation.userName : false;
-
     return { minLength, validCharacters, unique };
   };
 
@@ -147,6 +143,8 @@ export default function RegisterForm() {
           iconTheme: { primary: "#22c55e", secondary: "#fff" },
         }
       );
+
+      if (onSignInClick) onSignInClick();
     } catch {
       toast.error("Registration failed!", {
         duration: 6000,
@@ -168,65 +166,12 @@ export default function RegisterForm() {
     <div className="md:w-1/2 p-8 flex flex-col justify-center">
       <Toaster position="top-center" reverseOrder={false} />
 
-      <h1 className="flex items-center text-3xl font-extrabold mb-5 justify-center">
-        <span className="flex-1 relative h-8 flex items-center">
-          <svg
-            className="w-full h-full"
-            viewBox="0 0 100 20"
-            preserveAspectRatio="none"
-          >
-            <path
-              d="M 0 10 Q 25 5, 50 10 T 100 10"
-              stroke="url(#leftGradient)"
-              strokeWidth="2"
-              fill="none"
-              strokeLinecap="round"
-            />
-            <defs>
-              <linearGradient
-                id="leftGradient"
-                x1="0%"
-                y1="0%"
-                x2="100%"
-                y2="0%"
-              >
-                <stop offset="0%" stopColor="#a855f7" />
-                <stop offset="100%" stopColor="#8b5cf6" />
-              </linearGradient>
-            </defs>
-          </svg>
-        </span>
-
-        <span className="mx-6 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent drop-shadow-lg font-sans">
-          Create Your Account!
-        </span>
-
-        <span className="flex-1 relative h-8 flex items-center">
-          <svg
-            className="w-full h-full"
-            viewBox="0 0 100 20"
-            preserveAspectRatio="none"
-          >
-            <path
-              d="M 0 10 Q 25 15, 50 10 T 100 10"
-              stroke="url(#rightGradient)"
-              strokeWidth="2"
-              fill="none"
-              strokeLinecap="round"
-            />
-            <defs>
-              <linearGradient
-                id="rightGradient"
-                x1="0%"
-                y1="0%"
-                x2="100%"
-                y2="0%"
-              >
-                <stop offset="0%" stopColor="#3b82f6" />
-                <stop offset="100%" stopColor="#60a5fa" />
-              </linearGradient>
-            </defs>
-          </svg>
+      <h1 className="text-3xl font-extrabold mb-5 font-roboto -ml-3 text-center flex items-center justify-center gap-2">
+        <span
+          className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent"
+          style={{ textShadow: "2px 2px 4px rgba(142, 36, 170, 0.2)" }}
+        >
+          Start Your New Account
         </span>
       </h1>
 
@@ -251,7 +196,7 @@ export default function RegisterForm() {
         <InputField
           label="Email"
           name="userEmail"
-          placeholder="example@email.com"
+          placeholder="example@gmail.com"
           value={formData.userEmail}
           onChange={handleChange}
           onFocus={handleFocus}
@@ -284,7 +229,7 @@ export default function RegisterForm() {
             onChange={(e) =>
               setFormData({ ...formData, termsAgreed: e.target.checked })
             }
-            className="w-5 h-5 rounded accent-purple-600 focus:ring-purple-400"
+            className="w-5 h-5 cursor-pointer rounded accent-purple-600 focus:ring-purple-400"
             required
           />
           <label htmlFor="terms" className="ml-2 text-gray-600 text-sm">
@@ -305,14 +250,29 @@ export default function RegisterForm() {
           disabled={!isFormValid()}
           className={`w-full mt-3 py-2 rounded-lg font-semibold transition-colors ${
             isFormValid()
-              ? "bg-gradient-to-l from-blue-500 to-purple-600 text-white hover:opacity-90"
+              ? "bg-gradient-to-r cursor-pointer from-purple-600 to-blue-600 text-white hover:opacity-90"
               : "bg-gray-300 text-gray-500 cursor-not-allowed"
           }`}
         >
           Create account
         </button>
 
-        <SocialButtons />
+        {onSignInClick && (
+          <div className="flex items-center gap-4 mt-1">
+            <hr className="flex-1 border-gray-200" />
+            <button
+              type="button"
+              onClick={onSignInClick}
+              className="text-gray-600 text-[15px] flex items-center gap-1"
+            >
+              <span>Already have an account?</span>
+              <span className="text-purple-600 font-medium hover:underline cursor-pointer">
+                Sign in
+              </span>
+            </button>
+            <hr className="flex-1 border-gray-200" />
+          </div>
+        )}
       </form>
     </div>
   );

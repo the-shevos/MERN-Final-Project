@@ -1,0 +1,458 @@
+import React, { useEffect } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faMagnifyingGlass,
+  faChartPie,
+  faChevronDown,
+  faUserGear,
+  faIdBadge,
+  faKey,
+  faArrowRightFromBracket,
+  faChartSimple,
+  faChartLine,
+  faStar,
+} from "@fortawesome/free-solid-svg-icons";
+import { faCalendar as faCalendarRegular } from "@fortawesome/free-regular-svg-icons";
+
+const Dashboard = () => {
+  useEffect(() => {
+    const cards = document.querySelectorAll("#card-container > div");
+    let current = 0;
+    const interval = setInterval(() => {
+      cards[current].classList.remove("opacity-100");
+      cards[current].classList.add("opacity-0");
+      current = (current + 1) % cards.length;
+      cards[current].classList.remove("opacity-0");
+      cards[current].classList.add("opacity-100");
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div
+      className="bg-stone-300
+min-h-screen flex"
+    >
+      <aside className="w-56 bg-white border-2 border-gray-900 p-6 flex flex-col rounded-3xl m-4 mr-0 shrink-0 h-[615px] sticky top-3">
+        <div className="flex items-center gap-2 mb-4 pb-3 border-b-2 border-gray-300">
+          <div className="w-8 h-8 bg-slate-800 rounded-lg flex items-center justify-center">
+            <span className="text-white text-xs font-bold">JC</span>
+          </div>
+          <span className="font-semibold text-lg">Jacketexe</span>
+        </div>
+        <nav className="flex-1 space-y-2">
+          <a
+            href="#"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm text-gray-600 hover:bg-gray-200"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <rect x="3" y="3" width="7" height="7" rx="1" />
+              <rect x="14" y="3" width="7" height="7" rx="1" />
+              <rect x="3" y="14" width="7" height="7" rx="1" />
+              <rect x="14" y="14" width="7" height="7" rx="1" />
+            </svg>
+            Dashboard
+          </a>
+          <a
+            href="#"
+            className="flex items-center gap-3 px-4 py-2 rounded-xl text-sm text-gray-600 hover:bg-gray-200"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+              />
+            </svg>
+            Product
+          </a>
+          <a
+            href="#"
+            className="flex items-center gap-3 px-4 py-2 rounded-xl text-sm bg-slate-800 text-white"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+              />
+            </svg>
+            Orders
+          </a>
+          <a
+            href="#"
+            className="flex items-center gap-3 px-4 py-2 rounded-xl text-sm text-gray-600 hover:bg-gray-200"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+              />
+            </svg>
+            Notifications
+          </a>
+          <a
+            href="#"
+            className="flex items-center gap-3 px-4 py-2 rounded-xl text-sm text-gray-600 hover:bg-gray-200"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+              />
+            </svg>
+            Contact Help
+          </a>
+          <a
+            href="#"
+            className="flex items-center gap-3 px-4 py-2 rounded-xl text-sm text-gray-600 hover:bg-gray-200"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87M12 12a4 4 0 100-8 4 4 0 000 8z"
+              />
+            </svg>
+            Members
+          </a>
+        </nav>
+        <div className="mb-3 flex flex-col items-center gap-2 border-t-2 border-gray-300 pt-4">
+          <img
+            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTYhx7KkbOf5IBOgWi_XJqHxiy8wDZmpJeebA&s"
+            alt="Admin Profile"
+            className="w-16 h-16 rounded-full object-cover border-2 border-gray-400"
+          />
+          <div className="text-center">
+            <p className="text-md font-medium">Emily Jonson</p>
+            <p className="text-sm text-gray-400">jonson@bress.com</p>
+          </div>
+        </div>
+      </aside>
+
+      <main className="flex-1 p-6 space-y-4 overflow-auto">
+        <div className="flex items-center gap-6 max-w-7xl mx-auto">
+          <div className="w-[520px] bg-white rounded-full px-5 py-3 flex items-center gap-3 border border-gray-700 focus-within:ring-2 focus-within:ring-gray-900 transition-all duration-300 shadow-md hover:shadow-lg">
+            <FontAwesomeIcon
+              icon={faMagnifyingGlass}
+              className="text-gray-500"
+            />
+            <input
+              type="text"
+              placeholder="Search for customers, orders or product..."
+              className="bg-transparent outline-none flex-1 text-base placeholder-gray-400 text-gray-700"
+            />
+          </div>
+          <div className="flex items-center gap-3 ml-auto">
+            <div className="bg-white rounded-full px-4 py-3 flex items-center gap-2 text-sm border border-gray-800 shadow-sm">
+              <FontAwesomeIcon
+                icon={faCalendarRegular}
+                className="text-gray-500 text-sm"
+              />
+              <span className="text-gray-700 font-semibold text-xs tracking-wider uppercase">
+                Nov 22, 2025
+              </span>
+            </div>
+            <div className="relative group">
+              <button className="flex items-center px-5 py-3 rounded-full text-sm font-medium bg-slate-800 text-white hover:bg-slate-900 transition-all duration-200 shadow-lg transform hover:scale-[1.02]">
+                <FontAwesomeIcon icon={faChartPie} className="mr-2" />
+                Reports
+                <FontAwesomeIcon
+                  icon={faChevronDown}
+                  className="ml-2 text-xs transition-transform duration-200 group-hover:rotate-180"
+                />
+              </button>
+              <div className="absolute right-0 mt-2 w-48 z-50 bg-white border border-gray-400 rounded-xl shadow-2xl ring-1 ring-black/5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 origin-top-right transform scale-95 group-hover:scale-100">
+                <a
+                  href="#"
+                  className="block px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-200 hover:text-black rounded-t-xl"
+                >
+                  <FontAwesomeIcon icon={faChartSimple} className="mr-2" />
+                  Customers Report
+                </a>
+                <a
+                  href="#"
+                  className="block px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-200 hover:text-black"
+                >
+                  <FontAwesomeIcon icon={faChartLine} className="mr-2" />
+                  Orders Report
+                </a>
+                <a
+                  href="#"
+                  className="block px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-200 hover:text-black rounded-b-xl"
+                >
+                  <FontAwesomeIcon icon={faStar} className="mr-2" />
+                  Product Report
+                </a>
+              </div>
+            </div>
+            <div className="relative group">
+              <button className="w-11 h-11 flex items-center justify-center rounded-full bg-white border border-gray-200 hover:bg-gray-100 transition-all">
+                <FontAwesomeIcon
+                  icon={faUserGear}
+                  className="text-gray-600 text-lg"
+                />
+              </button>
+              <div className="absolute right-0 mt-3 z-50 w-48 bg-white border border-gray-400 rounded-xl shadow-2xl ring-1 ring-black/5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 origin-top-right transform scale-95 group-hover:scale-100">
+                <a
+                  href="#"
+                  className="block px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-200 rounded-t-xl"
+                >
+                  <FontAwesomeIcon icon={faIdBadge} className="mr-2" />
+                  Manage Account
+                </a>
+                <a
+                  href="#"
+                  className="block px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-200"
+                >
+                  <FontAwesomeIcon icon={faKey} className="mr-2" />
+                  Credentials
+                </a>
+                <a
+                  href="#"
+                  className="block border-t border-gray-200 px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 rounded-b-xl"
+                >
+                  <FontAwesomeIcon
+                    icon={faArrowRightFromBracket}
+                    className="mr-2"
+                  />
+                  Logout
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-3xl p-7 shadow-xl border border-gray-400/90">
+          <div className="flex items-center justify-between mb-8 relative">
+            <div className="flex gap-6">
+              <button className="text-gray-600 font-semibold border-b-2 border-gray-600 pb-2 transition-all">
+                All Tasks
+              </button>
+              <button className="text-gray-500 hover:text-gray-700 pb-2 transition-all">
+                Completed
+              </button>
+              <button className="text-gray-500 hover:text-gray-700 pb-2 transition-all">
+                In Progress
+              </button>
+              <button className="text-gray-500 hover:text-gray-700 pb-2 transition-all">
+                Pending
+              </button>
+            </div>
+            <div className="flex justify-center items-center gap-10">
+              <div className="flex items-center gap-10">
+                <div className="flex flex-col items-center">
+                  <p className="text-4xl font-bold text-gray-800">24</p>
+                  <p className="text-gray-500 text-sm mt-1">Pending</p>
+                </div>
+                <div className="w-px h-12 bg-gray-300"></div>
+                <div className="flex flex-col items-center">
+                  <p className="text-4xl font-bold text-gray-800">94</p>
+                  <p className="text-gray-500 text-sm mt-1">Done</p>
+                </div>
+                <div className="w-px h-12 bg-gray-300"></div>
+                <div className="flex flex-col items-center">
+                  <p className="text-4xl font-bold text-gray-800">23</p>
+                  <p className="text-gray-500 text-sm mt-1">Processing</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="overflow-hidden rounded-2xl border border-gray-100">
+            <table className="w-full">
+              <thead className="bg-gray-200">
+                <tr className="text-left text-gray-500 text-xs uppercase tracking-wide">
+                  <th className="py-3 px-4 font-medium">Name</th>
+                  <th className="py-3 px-4 font-medium">Admin</th>
+                  <th className="py-3 px-4 font-medium">Members</th>
+                  <th className="py-3 px-4 font-medium">Status</th>
+                  <th className="py-3 px-4 font-medium">Run time</th>
+                  <th className="py-3 px-4 font-medium">Finish date</th>
+                </tr>
+              </thead>
+              <tbody className="text-sm">
+                <tr className="border-t hover:bg-gray-50 transition-all">
+                  <td className="py-4 px-4 font-medium text-gray-700">
+                    ClientOnboarding - Circle
+                  </td>
+                  <td className="py-4 px-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-200 to-pink-400 flex items-center justify-center font-medium text-pink-800 text-xs shadow-sm">
+                        S
+                      </div>
+                      <span className="text-gray-700">Samanta J.</span>
+                    </div>
+                  </td>
+                  <td className="py-4 px-4 text-gray-600">3</td>
+                  <td className="py-4 px-4">
+                    <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 text-orange-600">
+                      <span className="w-2 h-2 rounded-full bg-orange-500"></span>
+                      In progress
+                    </span>
+                  </td>
+                  <td className="py-4 px-4 text-gray-500">6 hours</td>
+                  <td className="py-4 px-4 text-gray-500">6 Mon</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-white rounded-3xl p-8 border border-gray-600 w-[600px]">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-lg font-semibold">Order Progress</h2>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="w-2 h-2 rounded-full bg-cyan-400"></span>
+                  In Progress
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="w-2 h-2 rounded-full bg-slate-800"></span>
+                  Completed
+                </div>
+                <div className="bg-gray-300 rounded-lg px-3 py-1 text-sm flex items-center gap-1 cursor-pointer">
+                  01-07 May
+                </div>
+              </div>
+            </div>
+            <p className="text-xs text-gray-400 mb-6">
+              Data updates every 3 hours
+            </p>
+            <div className="relative h-42">
+              <svg
+                className="w-full h-full"
+                viewBox="0 0 400 120"
+                preserveAspectRatio="none"
+              >
+                <line x1="30" y1="0" x2="400" y2="0" stroke="#f0f0f0" />
+                <line x1="30" y1="30" x2="400" y2="30" stroke="#f0f0f0" />
+                <line x1="30" y1="60" x2="400" y2="60" stroke="#f0f0f0" />
+                <line x1="30" y1="90" x2="400" y2="90" stroke="#f0f0f0" />
+                <line x1="30" y1="120" x2="400" y2="120" stroke="#f0f0f0" />
+                <text x="10" y="6" className="text-xs" fill="#9ca3af">
+                  40
+                </text>
+                <text x="10" y="35" className="text-xs" fill="#9ca3af">
+                  30
+                </text>
+                <text x="10" y="65" className="text-xs" fill="#9ca3af">
+                  20
+                </text>
+                <text x="10" y="95" className="text-xs" fill="#9ca3af">
+                  10
+                </text>
+                <text x="10" y="120" className="text-xs" fill="#9ca3af">
+                  0
+                </text>
+                <polyline
+                  fill="none"
+                  stroke="#22d3ee"
+                  strokeWidth="2"
+                  points="50,90 100,75 150,60 200,15 250,30 300,50 350,70"
+                />
+                <polyline
+                  fill="none"
+                  stroke="#1e293b"
+                  strokeWidth="2"
+                  points="50,100 100,85 150,70 200,35 250,20 300,40 350,55"
+                />
+                <circle cx="50" cy="90" r="4" fill="#22d3ee" />
+                <circle cx="100" cy="75" r="4" fill="#22d3ee" />
+                <circle cx="150" cy="60" r="4" fill="#22d3ee" />
+                <circle cx="200" cy="15" r="4" fill="#22d3ee" />
+                <circle cx="250" cy="30" r="4" fill="#22d3ee" />
+                <circle cx="300" cy="50" r="4" fill="#22d3ee" />
+                <circle cx="350" cy="70" r="4" fill="#22d3ee" />
+                <rect
+                  x="175"
+                  y="-5"
+                  width="50"
+                  height="22"
+                  rx="6"
+                  fill="#1e293b"
+                />
+                <text
+                  x="200"
+                  y="11"
+                  textAnchor="middle"
+                  fill="white"
+                  fontSize="10"
+                >
+                  117
+                </text>
+              </svg>
+              <div className="flex justify-between px-6 mt-2 text-xs text-gray-400">
+                <span>Mon</span>
+                <span>Tue</span>
+                <span>Wed</span>
+                <span>Thu</span>
+                <span>Fri</span>
+                <span>Sat</span>
+                <span>Sun</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-slate-800 rounded-3xl p-8 text-white relative">
+            <h2 className="text-[22px] font-semibold mb-6">
+              Assistance for Contact Support
+            </h2>
+            <div id="card-container" className="relative h-40">
+              <div className="bg-white rounded-2xl p-4 text-gray-800 absolute inset-0 transition-opacity duration-700 opacity-100">
+                <h3 className="font-medium mb-1">John Doe</h3>
+                <p className="text-gray-500 text-sm mb-2">john@example.com</p>
+                <p className="text-gray-700 text-sm">Task: Setup dashboard</p>
+              </div>
+              <div className="bg-white rounded-2xl p-4 text-gray-800 absolute inset-0 transition-opacity duration-700 opacity-0">
+                <h3 className="font-medium mb-1">Jane Smith</h3>
+                <p className="text-gray-500 text-sm mb-2">jane@example.com</p>
+                <p className="text-gray-700 text-sm">Task: Update clients</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default Dashboard;

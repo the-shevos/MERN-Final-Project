@@ -55,10 +55,22 @@ export async function loginUser(req: Request, res: Response): Promise<void> {
     user.refreshToken = refreshToken;
     await user.save();
 
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      maxAge: 60 * 60 * 1000,
+    });
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
     res.json({
       message: "Login successful",
-      accessToken,
-      refreshToken,
     });
   } catch (err) {
     console.error(err);
@@ -68,9 +80,12 @@ export async function loginUser(req: Request, res: Response): Promise<void> {
 
 export async function forgotPassword(req: Request, res: Response) {
   try {
-    const { userEmail } = req.body;
+    const { userName } = req.body;
 
-    const user = await User.findOne({ userEmail });
+    if (!userName)
+      return res.status(400).json({ error: "Username is required" });
+
+    const user = await User.findOne({ userName });
     if (!user) return res.status(400).json({ error: "User not found" });
 
     const resetToken = crypto.randomBytes(32).toString("hex");
@@ -80,9 +95,11 @@ export async function forgotPassword(req: Request, res: Response) {
     await user.save();
 
     const resetLink = `http://localhost:3000/api/v1/user/reset-password?token=${resetToken}`;
-    await sendPasswordResetEmail(userEmail, resetLink);
 
-    res.json({ message: "Password reset link sent to your email" });
+    // send reset email to user.userEmail
+    await sendPasswordResetEmail(user.userEmail, resetLink);
+
+    res.json({ message: "Reset link sent to your registered email!" });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }

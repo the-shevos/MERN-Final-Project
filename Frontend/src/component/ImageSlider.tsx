@@ -46,8 +46,8 @@ export default function ImageSlider() {
   }, [currentIndex]);
 
   return (
-    <div className="md:w-1/2 relative flex items-center justify-center p-6 bg-white">
-      <div className="w-full h-80 md:h-[570px] relative rounded-3xl overflow-hidden shadow-lg border-3 border-zinc-700/90">
+    <div className="md:w-1/2 relative flex items-center justify-center p-6 bg-white ">
+      <div className="w-full h-80 md:h-[500px] relative rounded-3xl overflow-hidden shadow-lg border-3 border-zinc-700/90">
         <div className="absolute top-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-10">
           {images.map((_, idx) => (
             <div
