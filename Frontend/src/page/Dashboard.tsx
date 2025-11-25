@@ -68,9 +68,13 @@ min-h-screen flex"
             </svg>
             Dashboard
           </Link>
-          <a
-            href="#"
-            className="flex items-center gap-3 px-4 py-2 rounded-xl text-sm text-gray-600 hover:bg-gray-200"
+          <Link
+            to="products"
+            className={`flex items-center gap-3 px-4 py-2 rounded-xl text-sm ${
+              isActive("/dashboard/products")
+                ? "bg-slate-800 text-white"
+                : "text-gray-600 hover:bg-gray-200"
+            }`}
           >
             <svg
               className="w-5 h-5"
@@ -86,7 +90,7 @@ min-h-screen flex"
               />
             </svg>
             Product
-          </a>
+          </Link>
           <a
             href="#"
             className="flex items-center gap-3 px-4 py-2 rounded-xl text-sm text-gray-600 hover:bg-gray-200"
@@ -123,7 +127,7 @@ min-h-screen flex"
                 d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
               />
             </svg>
-            Notifications
+            Customization
           </a>
           <Link
             to="support"

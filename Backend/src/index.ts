@@ -7,6 +7,7 @@ import userRegisterRouter from "./routes/user-register-router";
 import userLoginRouter from "./routes/user-login-router";
 import contactRouter from "./routes/contact-routes";
 import googleUsersRouter from "./server/get-google-users";
+import productRoutes from "./routes/product-routes";
 
 dotenv.config();
 
@@ -33,6 +34,7 @@ app.use("/api/v1/user", userRegisterRouter);
 app.use("/api/v1/user", userLoginRouter);
 app.use("/api/v1/contact", contactRouter);
 app.use("/api", googleUsersRouter);
+app.use("/api/v1/products", productRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
