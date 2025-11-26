@@ -91,9 +91,13 @@ min-h-screen flex"
             </svg>
             Product
           </Link>
-          <a
-            href="#"
-            className="flex items-center gap-3 px-4 py-2 rounded-xl text-sm text-gray-600 hover:bg-gray-200"
+          <Link
+            to="orders"
+            className={`flex items-center gap-3 px-4 py-2 rounded-xl text-sm ${
+              isActive("/dashboard/orders")
+                ? "bg-slate-800 text-white"
+                : "text-gray-600 hover:bg-gray-200"
+            }`}
           >
             <svg
               className="w-5 h-5"
@@ -109,7 +113,7 @@ min-h-screen flex"
               />
             </svg>
             Orders
-          </a>
+          </Link>
           <a
             href="#"
             className="flex items-center gap-3 px-4 py-2 rounded-xl text-sm text-gray-600 hover:bg-gray-200"

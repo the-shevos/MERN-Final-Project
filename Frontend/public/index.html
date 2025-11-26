@@ -3,486 +3,714 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Bress Dashboard</title>
+    <title>Fashion - Luxury Collection</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-    />
     <style>
-      * {
-        font-family: "Inter", sans-serif;
+      @import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Poppins:wght@300;400;500;600;700&display=swap");
+
+      body {
+        font-family: "Poppins", sans-serif;
       }
-      .scrollbar-hide::-webkit-scrollbar {
-        display: none;
+
+      .font-display {
+        font-family: "Cormorant Garamond", serif;
       }
-      .scrollbar-hide {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
+
+      .gradient-purple {
+        background: linear-gradient(
+          135deg,
+          #667eea 0%,
+          #764ba2 50%,
+          #f093fb 100%
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .bg-gradient-purple {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+
+      .bg-gradient-purple-light {
+        background: linear-gradient(
+          135deg,
+          rgba(102, 126, 234, 0.1) 0%,
+          rgba(118, 75, 162, 0.1) 100%
+        );
+      }
+
+      .glass {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+      }
+
+      .card-hover {
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .card-hover:hover {
+        transform: translateY(-16px) scale(1.02);
+        box-shadow: 0 30px 60px rgba(102, 126, 234, 0.3);
+      }
+
+      .floating {
+        animation: float 8s ease-in-out infinite;
+      }
+
+      .floating-delayed {
+        animation: float 8s ease-in-out infinite 4s;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0px) rotate(0deg);
+        }
+        25% {
+          transform: translateY(-30px) rotate(2deg);
+        }
+        50% {
+          transform: translateY(-20px) rotate(-2deg);
+        }
+        75% {
+          transform: translateY(-35px) rotate(1deg);
+        }
+      }
+
+      .glow {
+        box-shadow: 0 0 40px rgba(102, 126, 234, 0.4);
+      }
+
+      .blob {
+        border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+        animation: blob-animate 10s ease-in-out infinite;
+      }
+
+      @keyframes blob-animate {
+        0%,
+        100% {
+          border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+        }
+        25% {
+          border-radius: 58% 42% 75% 25% / 76% 46% 54% 24%;
+        }
+        50% {
+          border-radius: 50% 50% 33% 67% / 55% 27% 73% 45%;
+        }
+        75% {
+          border-radius: 33% 67% 58% 42% / 63% 68% 32% 37%;
+        }
+      }
+
+      .shine {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .shine::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.3),
+          transparent
+        );
+        transition: left 0.7s;
+      }
+
+      .shine:hover::before {
+        left: 100%;
+      }
+
+      .pattern {
+        background-image: radial-gradient(
+            circle at 20% 50%,
+            rgba(102, 126, 234, 0.05) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 80% 80%,
+            rgba(240, 147, 251, 0.05) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 40% 20%,
+            rgba(118, 75, 162, 0.05) 0%,
+            transparent 50%
+          );
       }
     </style>
   </head>
-  <body class="bg-zinc-700/60 min-h-screen flex">
-    <aside
-      class="w-56 bg-white border-2 border-gray-900 p-6 flex flex-col rounded-3xl m-4 mr-0 shrink-0 h-[615px] sticky top-3"
-    >
-      <div class="flex items-center gap-2 mb-4 pb-3 border-b-2 border-gray-300">
-        <div
-          class="w-8 h-8 bg-slate-800 rounded-lg flex items-center justify-center"
-        >
-          <span class="text-white text-xs font-bold">JC</span>
+  <body
+    class="bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 min-h-screen pattern"
+  >
+    <!-- Decorative Blobs -->
+    <div
+      class="fixed top-0 left-0 w-96 h-96 bg-purple-300 opacity-20 blur-3xl blob"
+    ></div>
+    <div
+      class="fixed bottom-0 right-0 w-96 h-96 bg-pink-300 opacity-20 blur-3xl blob"
+      style="animation-delay: 5s"
+    ></div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 glass border-b border-white/20">
+      <div class="max-w-7xl mx-auto px-6 lg:px-12">
+        <div class="flex items-center justify-between h-24">
+          <div class="text-4xl font-display font-bold gradient-purple">
+            FASHION
+          </div>
+
+          <div class="hidden lg:flex items-center gap-12">
+            <a
+              href="#"
+              class="text-sm font-semibold text-gray-700 hover:text-purple-600 transition relative group"
+            >
+              NEW ARRIVAL
+              <span
+                class="absolute -bottom-2 left-0 w-0 h-1 bg-gradient-purple group-hover:w-full transition-all duration-500 rounded-full"
+              ></span>
+            </a>
+            <a
+              href="#"
+              class="text-sm font-semibold text-gray-700 hover:text-purple-600 transition relative group"
+            >
+              WOMEN
+              <span
+                class="absolute -bottom-2 left-0 w-0 h-1 bg-gradient-purple group-hover:w-full transition-all duration-500 rounded-full"
+              ></span>
+            </a>
+            <a
+              href="#"
+              class="text-sm font-semibold text-gray-700 hover:text-purple-600 transition relative group"
+            >
+              MEN
+              <span
+                class="absolute -bottom-2 left-0 w-0 h-1 bg-gradient-purple group-hover:w-full transition-all duration-500 rounded-full"
+              ></span>
+            </a>
+            <a
+              href="#"
+              class="text-sm font-semibold text-gray-700 hover:text-purple-600 transition relative group"
+            >
+              COLLECTIONS
+              <span
+                class="absolute -bottom-2 left-0 w-0 h-1 bg-gradient-purple group-hover:w-full transition-all duration-500 rounded-full"
+              ></span>
+            </a>
+            <a
+              href="#"
+              class="text-sm font-semibold text-gray-700 hover:text-purple-600 transition relative group"
+            >
+              CONTACT
+              <span
+                class="absolute -bottom-2 left-0 w-0 h-1 bg-gradient-purple group-hover:w-full transition-all duration-500 rounded-full"
+              ></span>
+            </a>
+          </div>
+
+          <div class="flex items-center gap-4">
+            <button
+              class="p-3 hover:bg-purple-100 rounded-2xl transition-all duration-300"
+            >
+              <svg
+                class="w-6 h-6 text-purple-700"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                ></path>
+              </svg>
+            </button>
+            <button
+              class="p-3 hover:bg-purple-100 rounded-2xl transition-all duration-300"
+            >
+              <svg
+                class="w-6 h-6 text-purple-700"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                ></path>
+              </svg>
+            </button>
+            <button
+              class="relative p-3 hover:bg-purple-100 rounded-2xl transition-all duration-300"
+            >
+              <svg
+                class="w-6 h-6 text-purple-700"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                ></path>
+              </svg>
+              <span
+                class="absolute -top-1 -right-1 w-6 h-6 bg-gradient-purple text-white text-xs rounded-full flex items-center justify-center font-semibold glow"
+                >5</span
+              >
+            </button>
+            <button class="lg:hidden p-3">
+              <svg
+                class="w-6 h-6 text-purple-700"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 6h16M4 12h16M4 18h16"
+                ></path>
+              </svg>
+            </button>
+          </div>
         </div>
-        <span class="font-semibold text-lg">Jacketexe</span>
       </div>
+    </nav>
 
-      <nav class="flex-1 space-y-2">
-        <a
-          href="#"
-          class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm text-gray-600 hover:bg-gray-200"
-        >
-          <svg
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <rect x="3" y="3" width="7" height="7" rx="1" />
-            <rect x="14" y="3" width="7" height="7" rx="1" />
-            <rect x="3" y="14" width="7" height="7" rx="1" />
-            <rect x="14" y="14" width="7" height="7" rx="1" />
-          </svg>
-          Dashboard
-        </a>
-        <a
-          href="#"
-          class="flex items-center gap-3 px-4 py-2 rounded-xl text-sm text-gray-600 hover:bg-gray-200"
-        >
-          <svg
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
-            />
-          </svg>
-          Product
-        </a>
-        <a
-          href="#"
-          class="flex items-center gap-3 px-4 py-2 rounded-xl text-sm bg-slate-800 text-white"
-        >
-          <svg
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-            />
-          </svg>
-          Orders
-        </a>
-        <a
-          href="#"
-          class="flex items-center gap-3 px-4 py-2 rounded-xl text-sm text-gray-600 hover:bg-gray-200"
-        >
-          <svg
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-            />
-          </svg>
-          Notifications
-        </a>
-        <a
-          href="#"
-          class="flex items-center gap-3 px-4 py-2 rounded-xl text-sm text-gray-600 hover:bg-gray-200"
-        >
-          <svg
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-            />
-          </svg>
-          Contact Help
-        </a>
-        <a
-          href="#"
-          class="flex items-center gap-3 px-4 py-2 rounded-xl text-sm text-gray-600 hover:bg-gray-200"
-        >
-          <svg
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87M12 12a4 4 0 100-8 4 4 0 000 8z"
-            />
-          </svg>
-          Members
-        </a>
-      </nav>
+    <!-- Hero Section -->
+    <div class="max-w-7xl mx-auto px-6 lg:px-12 pt-40 pb-20">
+      <div class="grid lg:grid-cols-2 gap-20 items-center relative">
+        <!-- Left Content -->
+        <div class="space-y-10 relative z-10">
+          <div class="space-y-6">
+            <div
+              class="inline-flex items-center gap-3 px-6 py-3 bg-gradient-purple-light backdrop-blur-xl rounded-full border border-purple-200/50"
+            >
+              <span class="relative flex h-3 w-3">
+                <span
+                  class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"
+                ></span>
+                <span
+                  class="relative inline-flex rounded-full h-3 w-3 bg-purple-500"
+                ></span>
+              </span>
+              <span class="text-sm font-semibold gradient-purple"
+                >SPRING COLLECTION 2025</span
+              >
+            </div>
 
-      <div
-        class="mb-3 flex flex-col items-center gap-2 border-t-2 border-gray-300 pt-4"
-      >
-        <img
-          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTYhx7KkbOf5IBOgWi_XJqHxiy8wDZmpJeebA&s"
-          alt="Admin Profile"
-          class="w-16 h-16 rounded-full object-cover border-2 border-gray-400"
-        />
-        <div class="text-center">
-          <p class="text-md font-medium">Emily Jonson</p>
-          <p class="text-sm text-gray-400">jonson@bress.com</p>
-        </div>
-      </div>
-    </aside>
+            <h1
+              class="text-7xl lg:text-8xl xl:text-9xl font-display font-bold leading-none"
+            >
+              Find Your<br />
+              <span class="gradient-purple">Perfect</span><br />
+              <span class="text-gray-800">Style</span>
+            </h1>
 
-    <main class="flex-1 p-6 space-y-4 overflow-auto">
-      <div class="flex items-center gap-6 max-w-7xl mx-auto">
-        <div
-          class="w-[520px] bg-white rounded-full px-5 py-3 flex items-center gap-3 border border-gray-700 focus-within:ring-2 focus-within:ring-gray-900 transition-all duration-300 shadow-md hover:shadow-lg"
-        >
-          <i class="fa-solid fa-magnifying-glass text-gray-500"></i>
-          <input
-            type="text"
-            placeholder="Search for customers, orders or product..."
-            class="bg-transparent outline-none flex-1 text-base placeholder-gray-400 text-gray-700"
-          />
+            <div class="w-32 h-1.5 bg-gradient-purple rounded-full"></div>
+          </div>
+
+          <p class="text-xl text-gray-600 max-w-xl leading-relaxed font-light">
+            Discover the latest trends in fashion. Express yourself through our
+            carefully curated collection of premium clothing that defines
+            elegance and sophistication.
+          </p>
+
+          <div class="flex flex-wrap gap-6">
+            <button
+              class="group relative bg-gradient-purple text-white px-12 py-5 text-base font-semibold rounded-2xl overflow-hidden glow hover:shadow-2xl transition-all duration-500 shine"
+            >
+              <span class="relative z-10 flex items-center gap-3">
+                EXPLORE COLLECTION
+                <svg
+                  class="w-5 h-5 group-hover:translate-x-2 transition-transform duration-300"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M17 8l4 4m0 0l-4 4m4-4H3"
+                  ></path>
+                </svg>
+              </span>
+            </button>
+            <button
+              class="px-12 py-5 text-base font-semibold border-2 border-purple-300 text-purple-700 rounded-2xl hover:bg-purple-600 hover:text-white hover:border-purple-600 transition-all duration-500 shine"
+            >
+              WATCH VIDEO
+            </button>
+          </div>
+
+          <!-- Stats -->
+          <div class="grid grid-cols-3 gap-10 pt-12">
+            <div class="space-y-2 relative">
+              <div
+                class="absolute -left-6 top-0 w-1 h-full bg-gradient-to-b from-purple-500 to-pink-500 rounded-full"
+              ></div>
+              <div class="text-5xl font-display font-bold gradient-purple">
+                12k+
+              </div>
+              <div class="text-sm text-gray-600 font-medium">
+                Premium Products
+              </div>
+            </div>
+            <div class="space-y-2 relative">
+              <div
+                class="absolute -left-6 top-0 w-1 h-full bg-gradient-to-b from-purple-500 to-pink-500 rounded-full"
+              ></div>
+              <div class="text-5xl font-display font-bold gradient-purple">
+                150k+
+              </div>
+              <div class="text-sm text-gray-600 font-medium">
+                Happy Customers
+              </div>
+            </div>
+            <div class="space-y-2 relative">
+              <div
+                class="absolute -left-6 top-0 w-1 h-full bg-gradient-to-b from-purple-500 to-pink-500 rounded-full"
+              ></div>
+              <div class="text-5xl font-display font-bold gradient-purple">
+                3k+
+              </div>
+              <div class="text-sm text-gray-600 font-medium">Global Stores</div>
+            </div>
+          </div>
         </div>
 
-        <div class="flex items-center gap-3 ml-auto">
+        <!-- Right Content - Product Showcase -->
+        <div class="relative h-[800px] lg:h-[900px]">
+          <!-- Small Product Card - Top Left -->
           <div
-            class="bg-white rounded-full px-4 py-3 flex items-center gap-2 text-sm border border-gray-800 shadow-sm"
+            class="absolute top-0 left-0 lg:left-10 w-72 card-hover floating z-30"
           >
-            <i class="fa-regular fa-calendar text-gray-500 text-sm"></i>
-            <span
-              id="current-date"
-              class="text-gray-700 font-semibold text-xs tracking-wider uppercase"
-              >Nov 22, 2025</span
-            >
-          </div>
-
-          <div class="relative group">
-            <button
-              class="flex items-center px-5 py-3 rounded-full text-sm font-medium bg-slate-800 text-white hover:bg-slate-900 transition-all duration-200 shadow-lg transform hover:scale-[1.02]"
-            >
-              <i class="fa-solid fa-chart-pie text-white mr-2"></i>
-              Reports
-              <i
-                class="fa-solid fa-chevron-down ml-2 text-xs transition-transform duration-200 group-hover:rotate-180"
-              ></i>
-            </button>
             <div
-              class="absolute right-0 mt-2 w-48 z-50 bg-white border border-gray-400 rounded-xl shadow-2xl ring-1 ring-black/5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 origin-top-right transform scale-95 group-hover:scale-100"
+              class="glass rounded-3xl shadow-2xl overflow-hidden border border-white/30"
             >
-              <a
-                href="#"
-                class="block px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-200 hover:text-black rounded-t-xl"
-              >
-                <i class="fa-solid fa-chart-simple mr-2"></i> Customers Report
-              </a>
-              <a
-                href="#"
-                class="block px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-200 hover:text-black"
-              >
-                <i class="fa-solid fa-chart-line mr-2"></i> Orders Report
-              </a>
-              <a
-                href="#"
-                class="block px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-200 hover:text-black rounded-b-xl"
-              >
-                <i class="fa-solid fa-star mr-2"></i> Product Report
-              </a>
-            </div>
-          </div>
-
-          <div class="relative group">
-            <button
-              class="w-11 h-11 flex items-center justify-center rounded-full bg-white border border-gray-200 hover:bg-gray-100 transition-all"
-            >
-              <i class="fa-solid fa-user-gear text-gray-600 text-lg"></i>
-            </button>
-            <div
-              class="absolute right-0 mt-3 z-50 w-48 bg-white border border-gray-400 rounded-xl shadow-2xl ring-1 ring-black/5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 origin-top-right transform scale-95 group-hover:scale-100"
-            >
-              <a
-                href="#"
-                class="block px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-200 rounded-t-xl"
-              >
-                <i class="fa-solid fa-id-badge mr-2"></i> Manage Account
-              </a>
-              <a
-                href="#"
-                class="block px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-200"
-              >
-                <i class="fa-solid fa-key mr-2"></i> Credentials
-              </a>
-              <a
-                href="#"
-                class="block border-t border-gray-200 px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 rounded-b-xl"
-              >
-                <i class="fa-solid fa-arrow-right-from-bracket mr-2"></i> Logout
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-3xl p-7 shadow-xl border border-gray-600">
-        <div class="flex items-center justify-between mb-8 relative">
-          <div class="flex gap-6">
-            <button
-              class="text-gray-600 font-semibold border-b-2 border-gray-600 pb-2 transition-all"
-            >
-              All Tasks
-            </button>
-            <button
-              class="text-gray-500 hover:text-gray-700 pb-2 transition-all"
-            >
-              Completed
-            </button>
-            <button
-              class="text-gray-500 hover:text-gray-700 pb-2 transition-all"
-            >
-              In Progress
-            </button>
-            <button
-              class="text-gray-500 hover:text-gray-700 pb-2 transition-all"
-            >
-              Pending
-            </button>
-          </div>
-          <div class="flex justify-center items-center gap-10">
-            <div class="flex items-center gap-10">
-              <div class="flex flex-col items-center">
-                <p class="text-4xl font-bold text-gray-800">24</p>
-                <p class="text-gray-500 text-sm mt-1">Pending</p>
-              </div>
-              <div class="w-px h-12 bg-gray-300"></div>
-              <div class="flex flex-col items-center">
-                <p class="text-4xl font-bold text-gray-800">94</p>
-                <p class="text-gray-500 text-sm mt-1">Done</p>
-              </div>
-              <div class="w-px h-12 bg-gray-300"></div>
-              <div class="flex flex-col items-center">
-                <p class="text-4xl font-bold text-gray-800">23</p>
-                <p class="text-gray-500 text-sm mt-1">Processing</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="overflow-hidden rounded-2xl border border-gray-100">
-          <table class="w-full">
-            <thead class="bg-gray-200">
-              <tr
-                class="text-left text-gray-500 text-xs uppercase tracking-wide"
-              >
-                <th class="py-3 px-4 font-medium">Name</th>
-                <th class="py-3 px-4 font-medium">Admin</th>
-                <th class="py-3 px-4 font-medium">Members</th>
-                <th class="py-3 px-4 font-medium">Status</th>
-                <th class="py-3 px-4 font-medium">Run time</th>
-                <th class="py-3 px-4 font-medium">Finish date</th>
-              </tr>
-            </thead>
-            <tbody class="text-sm">
-              <tr class="border-t hover:bg-gray-50 transition-all">
-                <td class="py-4 px-4 font-medium text-gray-700">
-                  ClientOnboarding - Circle
-                </td>
-                <td class="py-4 px-4">
-                  <div class="flex items-center gap-2">
-                    <div
-                      class="w-8 h-8 rounded-full bg-gradient-to-br from-pink-200 to-pink-400 flex items-center justify-center font-medium text-pink-800 text-xs shadow-sm"
-                    >
-                      S
-                    </div>
-                    <span class="text-gray-700">Samanta J.</span>
-                  </div>
-                </td>
-                <td class="py-4 px-4 text-gray-600">3</td>
-                <td class="py-4 px-4">
+              <div class="relative overflow-hidden group">
+                <div class="absolute top-4 left-4 z-10 flex gap-2">
                   <span
-                    class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 text-orange-600"
+                    class="bg-gradient-purple text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg"
+                    >NEW</span
                   >
-                    <span class="w-2 h-2 rounded-full bg-orange-500"></span>
-                    In progress
-                  </span>
-                </td>
-                <td class="py-4 px-4 text-gray-500">6 hours</td>
-                <td class="py-4 px-4 text-gray-500">6 Mon</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-2 gap-4">
-        <div class="bg-white rounded-3xl p-6 border border-gray-600 w-[600px]">
-          <div class="flex items-center justify-between mb-2">
-            <h2 class="text-lg font-semibold">Order Progress</h2>
-            <div class="flex items-center gap-4">
-              <div class="flex items-center gap-2 text-sm">
-                <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
-                In Progress
+                </div>
+                <img
+                  src="https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=400&h=500&fit=crop"
+                  alt="Product"
+                  class="w-full h-80 object-cover group-hover:scale-110 transition-transform duration-700"
+                />
+                <div
+                  class="absolute inset-0 bg-gradient-to-t from-purple-900/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                ></div>
+                <div
+                  class="absolute bottom-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500"
+                >
+                  <button
+                    class="w-12 h-12 glass rounded-full flex items-center justify-center shadow-xl hover:bg-purple-600 hover:text-white transition-all duration-300"
+                  >
+                    <svg
+                      class="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                      ></path>
+                    </svg>
+                  </button>
+                  <button
+                    class="w-12 h-12 glass rounded-full flex items-center justify-center shadow-xl hover:bg-purple-600 hover:text-white transition-all duration-300"
+                  >
+                    <svg
+                      class="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                      ></path>
+                    </svg>
+                  </button>
+                </div>
               </div>
-              <div class="flex items-center gap-2 text-sm">
-                <span class="w-2 h-2 rounded-full bg-slate-800"></span>
-                Completed
+              <div class="p-6 space-y-3">
+                <div class="flex items-center justify-between">
+                  <h3 class="font-semibold text-lg text-gray-800">
+                    Summer Vibes Top
+                  </h3>
+                  <div class="flex items-center gap-1">
+                    <svg class="w-5 h-5 fill-yellow-400" viewBox="0 0 20 20">
+                      <path
+                        d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"
+                      />
+                    </svg>
+                    <span class="text-sm font-bold text-gray-700">4.9</span>
+                  </div>
+                </div>
+                <div class="flex items-center justify-between">
+                  <div class="space-x-2">
+                    <span
+                      class="text-3xl font-display font-bold gradient-purple"
+                      >$42.99</span
+                    >
+                    <span class="text-sm text-gray-400 line-through"
+                      >$59.99</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Large Product Card - Bottom Right -->
+          <div
+            class="absolute bottom-0 right-0 w-80 lg:w-[420px] card-hover floating-delayed z-40"
+          >
+            <div
+              class="glass rounded-[2.5rem] shadow-2xl overflow-hidden border border-white/30"
+            >
+              <div class="relative overflow-hidden group">
+                <div class="absolute top-6 left-6 z-10 flex flex-col gap-2">
+                  <span
+                    class="bg-red-500 text-white text-xs font-bold px-5 py-2 rounded-full shadow-lg w-fit"
+                    >50% OFF</span
+                  >
+                  <span
+                    class="bg-purple-600 text-white text-xs font-bold px-5 py-2 rounded-full shadow-lg w-fit"
+                    >TRENDING</span
+                  >
+                </div>
+                <button
+                  class="absolute top-6 right-6 z-10 w-12 h-12 glass rounded-full flex items-center justify-center shadow-xl hover:bg-red-500 hover:text-white transition-all duration-300"
+                >
+                  <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fill-rule="evenodd"
+                      d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
+                      clip-rule="evenodd"
+                    ></path>
+                  </svg>
+                </button>
+                <img
+                  src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=500&h=600&fit=crop"
+                  alt="Featured Product"
+                  class="w-full h-[550px] object-cover group-hover:scale-110 transition-transform duration-700"
+                />
+                <div
+                  class="absolute inset-0 bg-gradient-to-t from-purple-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                ></div>
+                <button
+                  class="absolute bottom-8 left-1/2 -translate-x-1/2 bg-white text-purple-700 px-10 py-4 rounded-full font-bold text-sm opacity-0 group-hover:opacity-100 transform translate-y-6 group-hover:translate-y-0 transition-all duration-500 shadow-2xl hover:bg-gradient-purple hover:text-white"
+                >
+                  ADD TO CART
+                </button>
               </div>
               <div
-                class="bg-gray-300 rounded-lg px-3 py-1 text-sm flex items-center gap-1 cursor-pointer"
+                class="p-8 space-y-4 bg-gradient-to-br from-white to-purple-50/50"
               >
-                01-07 May
+                <div class="flex items-start justify-between">
+                  <div class="space-y-2 flex-1">
+                    <h3 class="font-bold text-xl text-gray-800">
+                      Pearl Long Coat
+                    </h3>
+                    <p class="text-sm text-gray-600">
+                      Premium Winter Collection
+                    </p>
+                    <div class="flex gap-2 pt-1">
+                      <span
+                        class="w-6 h-6 rounded-full bg-white border-2 border-purple-400 cursor-pointer hover:scale-110 transition-transform"
+                      ></span>
+                      <span
+                        class="w-6 h-6 rounded-full bg-gray-800 border-2 border-gray-800 cursor-pointer hover:scale-110 transition-transform"
+                      ></span>
+                      <span
+                        class="w-6 h-6 rounded-full bg-pink-300 border-2 border-pink-300 cursor-pointer hover:scale-110 transition-transform"
+                      ></span>
+                    </div>
+                  </div>
+                  <div class="flex flex-col items-end gap-1">
+                    <div class="flex items-center gap-1">
+                      <svg class="w-5 h-5 fill-yellow-400" viewBox="0 0 20 20">
+                        <path
+                          d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"
+                        />
+                      </svg>
+                      <span class="text-lg font-bold text-gray-800">4.9</span>
+                    </div>
+                    <span class="text-xs text-gray-500">(256 reviews)</span>
+                  </div>
+                </div>
+                <div
+                  class="flex items-center justify-between pt-4 border-t border-purple-100"
+                >
+                  <div class="space-y-1">
+                    <div class="flex items-baseline gap-3">
+                      <span
+                        class="text-4xl font-display font-bold gradient-purple"
+                        >$49.32</span
+                      >
+                      <span class="text-lg text-gray-400 line-through"
+                        >$98.64</span
+                      >
+                    </div>
+                  </div>
+                  <button
+                    class="w-14 h-14 bg-gradient-purple text-white rounded-2xl flex items-center justify-center hover:shadow-2xl transition-all duration-300 glow"
+                  >
+                    <svg
+                      class="w-6 h-6"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                      ></path>
+                    </svg>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-          <p class="text-xs text-gray-400 mb-6">Data updates every 3 hours</p>
-          <div class="relative h-42">
-            <svg
-              class="w-full h-full"
-              viewBox="0 0 400 120"
-              preserveAspectRatio="none"
-            >
-              <line x1="30" y1="0" x2="400" y2="0" stroke="#f0f0f0" />
-              <line x1="30" y1="30" x2="400" y2="30" stroke="#f0f0f0" />
-              <line x1="30" y1="60" x2="400" y2="60" stroke="#f0f0f0" />
-              <line x1="30" y1="90" x2="400" y2="90" stroke="#f0f0f0" />
-              <line x1="30" y1="120" x2="400" y2="120" stroke="#f0f0f0" />
-              <text x="10" y="6" class="text-xs" fill="#9ca3af">40</text>
-              <text x="10" y="35" class="text-xs" fill="#9ca3af">30</text>
-              <text x="10" y="65" class="text-xs" fill="#9ca3af">20</text>
-              <text x="10" y="95" class="text-xs" fill="#9ca3af">10</text>
-              <text x="10" y="120" class="text-xs" fill="#9ca3af">0</text>
-              <polyline
-                fill="none"
-                stroke="#22d3ee"
-                stroke-width="2"
-                points="50,90 100,75 150,60 200,15 250,30 300,50 350,70"
-              />
-              <polyline
-                fill="none"
-                stroke="#1e293b"
-                stroke-width="2"
-                points="50,100 100,85 150,70 200,35 250,20 300,40 350,55"
-              />
-              <circle cx="50" cy="90" r="4" fill="#22d3ee" />
-              <circle cx="100" cy="75" r="4" fill="#22d3ee" />
-              <circle cx="150" cy="60" r="4" fill="#22d3ee" />
-              <circle cx="200" cy="15" r="4" fill="#22d3ee" />
-              <circle cx="250" cy="30" r="4" fill="#22d3ee" />
-              <circle cx="300" cy="50" r="4" fill="#22d3ee" />
-              <circle cx="350" cy="70" r="4" fill="#22d3ee" />
-              <rect
-                x="175"
-                y="-5"
-                width="50"
-                height="22"
-                rx="6"
-                fill="#1e293b"
-              />
-              <text
-                x="200"
-                y="11"
-                text-anchor="middle"
-                fill="white"
-                font-size="10"
-              >
-                117
-              </text>
-            </svg>
-            <div class="flex justify-between px-6 mt-2 text-xs text-gray-400">
-              <span>Mon</span>
-              <span>Tue</span>
-              <span>Wed</span>
-              <span>Thu</span>
-              <span>Fri</span>
-              <span>Sat</span>
-              <span>Sun</span>
-            </div>
-          </div>
-        </div>
 
-        <div
-          class="bg-slate-800 rounded-3xl p-8 w-[450px] text-white relative ml-[70px]"
-        >
-          <div class="flex items-center justify-center mb-6">
-            <h2 class="text-[19px] font-semibold">
-              Assistance for Contact Support
-            </h2>
-          </div>
-          <div id="card-container" class="relative h-40">
-            <div
-              class="bg-white rounded-2xl p-4 text-gray-600 absolute inset-0 transition-opacity duration-700 opacity-100"
-            >
-              <h3 class="font-medium mb-1">John Doe</h3>
-              <p class="text-gray-500 text-sm mb-2">john@example.com</p>
-              <p class="text-gray-700 mb-2">"I need help with my order."</p>
-              <p class="text-gray-400 text-xs">21.03.22</p>
+          <!-- Floating Badge -->
+          <div
+            class="absolute top-1/3 right-1/4 w-32 h-32 glass rounded-full flex flex-col items-center justify-center shadow-2xl border border-white/30 floating z-20"
+          >
+            <div class="text-3xl font-display font-bold gradient-purple">
+              50%
             </div>
-            <div
-              class="bg-white rounded-2xl p-4 text-gray-800 absolute inset-0 transition-opacity duration-700 opacity-0"
-            >
-              <h3 class="font-medium mb-1">Jane Smith</h3>
-              <p class="text-gray-500 text-sm mb-2">jane@example.com</p>
-              <p class="text-gray-700 mb-2">"How do I reset my password?"</p>
-              <p class="text-gray-400 text-xs">22.03.22</p>
-            </div>
-            <div
-              class="bg-white rounded-2xl p-4 text-gray-800 absolute inset-0 transition-opacity duration-700 opacity-0"
-            >
-              <h3 class="font-medium mb-1">Alex Brown</h3>
-              <p class="text-gray-500 text-sm mb-2">alex@example.com</p>
-              <p class="text-gray-700 mb-2">"Issue with payment processing."</p>
-              <p class="text-gray-400 text-xs">23.03.22</p>
-            </div>
+            <div class="text-xs font-semibold text-purple-600">OFF</div>
           </div>
         </div>
       </div>
-    </main>
-    <script>
-      const cards = document.querySelectorAll("#card-container > div");
-      let current = 0;
-      setInterval(() => {
-        cards[current].classList.remove("opacity-100");
-        cards[current].classList.add("opacity-0");
-        current = (current + 1) % cards.length;
-        cards[current].classList.remove("opacity-0");
-        cards[current].classList.add("opacity-100");
-      }, 5000);
-    </script>
+    </div>
+
+    <!-- Features Section -->
+    <div class="max-w-7xl mx-auto px-6 lg:px-12 py-20">
+      <div class="grid md:grid-cols-4 gap-8">
+        <div
+          class="group text-center space-y-4 p-8 rounded-3xl hover:bg-white/70 hover:shadow-2xl transition-all duration-500"
+        >
+          <div
+            class="w-20 h-20 mx-auto bg-gradient-purple rounded-3xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 glow"
+          >
+            <svg
+              class="w-10 h-10 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
+              />
+            </svg>
+          </div>
+          <h3 class="font-bold text-lg text-gray-800">Free Shipping</h3>
+          <p class="text-sm text-gray-600">On all orders over $50</p>
+        </div>
+
+        <div
+          class="group text-center space-y-4 p-8 rounded-3xl hover:bg-white/70 hover:shadow-2xl transition-all duration-500"
+        >
+          <div
+            class="w-20 h-20 mx-auto bg-gradient-purple rounded-3xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 glow"
+          >
+            <svg
+              class="w-10 h-10 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+          <h3 class="font-bold text-lg text-gray-800">Money Back</h3>
+          <p class="text-sm text-gray-600">100% money back guarantee</p>
+        </div>
+
+        <div
+          class="group text-center space-y-4 p-8 rounded-3xl hover:bg-white/70 hover:shadow-2xl transition-all duration-500"
+        >
+          <div
+            class="w-20 h-20 mx-auto bg-gradient-purple rounded-3xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 glow"
+          >
+            <svg
+              class="w-10 h-10 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"
+              />
+            </svg>
+          </div>
+          <h3 class="font-bold text-lg text-gray-800">24/7 Support</h3>
+          <p class="text-sm text-gray-600">Dedicated customer support</p>
+        </div>
+
+        <div
+          class="group text-center space-y-4 p-8 rounded-3xl hover:bg-white/70 hover:shadow-2xl transition-all duration-500"
+        >
+          <div
+            class="w-20 h-20 mx-auto bg-gradient-purple rounded-3xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 glow"
+          >
+            <svg
+              class="w-10 h-10 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+              />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
