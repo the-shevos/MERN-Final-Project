@@ -7,6 +7,7 @@ import SupportPage from "./page/SupportPage";
 import DashboardHome from "./page/DashboardHome";
 import Members from "./page/Members";
 import ProductPage from "./page/ProductPage";
+import OrdersPage from "./page/OrdersPage";
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
           <Route path="support" element={<SupportPage />} />
           <Route path="/dashboard/products" element={<ProductPage />} />
           <Route path="members" element={<Members />} />
+          <Route path="orders" element={<OrdersPage />} />
         </Route>
       </Routes>
     </Router>
