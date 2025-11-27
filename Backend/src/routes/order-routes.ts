@@ -5,11 +5,15 @@ import {
   getOrderById,
   updateOrderStatus,
   cancelOrder,
+  getLatestOrders,
 } from "../controller/order-controller";
 
 const router = express.Router();
 
 router.get("/", getOrders);
+
+router.get("/latest", getLatestOrders);
+
 router.get("/:id", getOrderById);
 
 router.post("/", createOrder);

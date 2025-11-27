@@ -44,3 +44,14 @@ export const getContactRequests = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Server error: " + err.message });
   }
 };
+
+export const getContactRequestsLimit = async (req: Request, res: Response) => {
+  try {
+    const requests = await ContactRequest.find()
+      .sort({ createdAt: -1 })
+      .limit(5);
+    res.status(200).json(requests);
+  } catch (err: any) {
+    res.status(500).json({ error: "Server error: " + err.message });
+  }
+};

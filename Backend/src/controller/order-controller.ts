@@ -96,3 +96,16 @@ export const cancelOrder = async (req: Request, res: Response) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+export const getLatestOrders = async (req: Request, res: Response) => {
+  try {
+    const latestOrders = await Order.find()
+      .populate("items.product")
+      .sort({ createdAt: -1 })
+      .limit(5);
+
+    res.status(200).json(latestOrders);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+};
