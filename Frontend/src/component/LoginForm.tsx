@@ -4,12 +4,15 @@ import InputField from "./InputField";
 import SocialButtons from "./SocialButtons";
 import toast, { Toaster } from "react-hot-toast";
 import axios, { AxiosError } from "axios";
+import { useNavigate } from "react-router-dom";
 
 interface LoginFormProps {
   onRegisterClick?: () => void;
 }
 
 export default function LoginForm({ onRegisterClick }: LoginFormProps) {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     userName: "",
     userPassword: "",
@@ -83,7 +86,7 @@ export default function LoginForm({ onRegisterClick }: LoginFormProps) {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      await axios.post(
+      const response = await axios.post(
         "http://localhost:3000/api/v1/user/login",
         {
           userName: formData.userName,
@@ -91,8 +94,17 @@ export default function LoginForm({ onRegisterClick }: LoginFormProps) {
         },
         { withCredentials: true }
       );
-      setPasswordError(false);
+
+      const user = response.data.user;
+      const accessToken = response.data.accessToken;
+
+      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("token", accessToken);
+
       toast.success("Logged in successfully!");
+
+      if (user.role === "admin") navigate("/dashboard");
+      else navigate("/");
     } catch (err: unknown) {
       const error = err as AxiosError<{ message: string }>;
       const msg = error.response?.data?.message || "Login failed!";

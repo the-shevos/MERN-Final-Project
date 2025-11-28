@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import dotenv from "dotenv";
+
 dotenv.config();
 
 import { User } from "../model/User";
@@ -71,6 +72,15 @@ export async function loginUser(req: Request, res: Response): Promise<void> {
 
     res.json({
       message: "Login successful",
+      user: {
+        _id: user._id,
+        userName: user.userName,
+        userEmail: user.userEmail,
+        profileImage: user.profileImage || "",
+        role: user.role,
+      },
+      accessToken,
+      refreshToken,
     });
   } catch (err) {
     console.error(err);
@@ -96,7 +106,6 @@ export async function forgotPassword(req: Request, res: Response) {
 
     const resetLink = `http://localhost:3000/api/v1/user/reset-password?token=${resetToken}`;
 
-    // send reset email to user.userEmail
     await sendPasswordResetEmail(user.userEmail, resetLink);
 
     res.json({ message: "Reset link sent to your registered email!" });

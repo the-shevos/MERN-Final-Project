@@ -64,7 +64,8 @@ const OrdersPage = () => {
     }
   };
 
-  if (loading) return <p className="text-center text-white mt-10">Loading orders...</p>;
+  if (loading)
+    return <p className="text-center text-white mt-10">Loading orders...</p>;
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
@@ -101,13 +102,15 @@ const OrdersPage = () => {
                 <span className="font-medium">User:</span> {order.user}
               </p>
               <p>
-                <span className="font-medium">Payment:</span> {order.paymentMethod}
+                <span className="font-medium">Payment:</span>{" "}
+                {order.paymentMethod}
               </p>
               <p>
                 <span className="font-medium">Total:</span> ${order.totalAmount}
               </p>
               <p>
-                <span className="font-medium">Shipping:</span> {order.shippingAddress}
+                <span className="font-medium">Shipping:</span>{" "}
+                {order.shippingAddress}
               </p>
               <p>
                 <span className="font-medium">Items:</span>{" "}
@@ -142,13 +145,16 @@ const OrdersPage = () => {
                 <span className="font-medium">User:</span> {selectedOrder.user}
               </p>
               <p>
-                <span className="font-medium">Payment:</span> {selectedOrder.paymentMethod}
+                <span className="font-medium">Payment:</span>{" "}
+                {selectedOrder.paymentMethod}
               </p>
               <p>
-                <span className="font-medium">Total Amount:</span> ${selectedOrder.totalAmount}
+                <span className="font-medium">Total Amount:</span> $
+                {selectedOrder.totalAmount}
               </p>
               <p>
-                <span className="font-medium">Shipping:</span> {selectedOrder.shippingAddress}
+                <span className="font-medium">Shipping:</span>{" "}
+                {selectedOrder.shippingAddress}
               </p>
               <p>
                 <span className="font-medium">Created At:</span>{" "}
@@ -186,7 +192,9 @@ const OrdersPage = () => {
                     />
                   )}
                   <div className="flex flex-col">
-                    <h4 className="font-semibold text-gray-800">{item.product.name}</h4>
+                    <h4 className="font-semibold text-gray-800">
+                      {item.product.name}
+                    </h4>
                     <p className="text-gray-600">Quantity: {item.quantity}</p>
                     <p className="text-gray-600">Price: ${item.price}</p>
                   </div>
@@ -199,7 +207,9 @@ const OrdersPage = () => {
                 <>
                   <button
                     className="flex-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
-                    onClick={() => updateStatus(selectedOrder._id, "in-progress")}
+                    onClick={() =>
+                      updateStatus(selectedOrder._id, "in-progress")
+                    }
                   >
                     Start Progress
                   </button>

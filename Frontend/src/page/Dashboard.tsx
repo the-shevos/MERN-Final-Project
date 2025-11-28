@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 import {
   faMagnifyingGlass,
@@ -8,7 +9,6 @@ import {
   faChevronDown,
   faUserGear,
   faIdBadge,
-  faKey,
   faArrowRightFromBracket,
   faChartSimple,
   faChartLine,
@@ -20,19 +20,273 @@ const Dashboard = () => {
   const location = useLocation();
   const isActive = (path: string) => location.pathname === path;
 
-  useEffect(() => {
-    const cards = document.querySelectorAll("#card-container > div");
-    let current = 0;
-    const interval = setInterval(() => {
-      cards[current].classList.remove("opacity-100");
-      cards[current].classList.add("opacity-0");
-      current = (current + 1) % cards.length;
-      cards[current].classList.remove("opacity-0");
-      cards[current].classList.add("opacity-100");
-    }, 5000);
+  const [admin, setAdmin] = React.useState<any>({
+    name: "",
+    email: "",
+    profileImage: "",
+    _id: "",
+  });
 
-    return () => clearInterval(interval);
+  useEffect(() => {
+    setFormData({
+      name: admin.name,
+      email: admin.email,
+      profileImage: admin.profileImage,
+      profileImageFile: null,
+      userPassword: "",
+    });
+  }, [admin]);
+
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("admin");
+
+    navigate("/login");
+  };
+
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [formData, setFormData] = React.useState({
+    name: "",
+    email: "",
+    profileImage: "",
+    profileImageFile: null,
+    userPassword: "",
+  });
+
+  useEffect(() => {
+    const fetchAdmin = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        const res = await axios.get("http://localhost:3000/api/v1/admin/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        console.log("Admin fetched:", res.data);
+
+        setAdmin({
+          name: res.data.user.userName,
+          email: res.data.user.userEmail,
+          profileImage: res.data.user.profileImage,
+          _id: res.data.user._id,
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchAdmin();
   }, []);
+
+  const generateOrdersReport = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await axios.get("http://localhost:3000/api/v1/orders", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const orders = res.data;
+
+      const { jsPDF } = await import("jspdf");
+      const autoTable = (await import("jspdf-autotable")).default;
+
+      const doc = new jsPDF();
+      let y = 20;
+
+      doc.setFontSize(18);
+      doc.text("FULL ORDERS REPORT", 14, y);
+      y += 10;
+
+      orders.forEach((order: any, index: number) => {
+        doc.setFontSize(16);
+        doc.text(`Order #${order._id.slice(-6)}`, 14, y);
+        y += 8;
+
+        doc.setFontSize(12);
+
+        const orderInfo = [
+          ["User", order.user],
+          ["Total Amount", `$${order.totalAmount}`],
+          ["Payment Method", order.paymentMethod],
+          ["Shipping Address", order.shippingAddress],
+          ["Status", order.status],
+          ["Created At", new Date(order.createdAt).toLocaleString()],
+        ];
+
+        autoTable(doc, {
+          startY: y,
+          theme: "grid",
+          head: [["Field", "Value"]],
+          body: orderInfo,
+        });
+
+        y = (doc as any).lastAutoTable.finalY + 10;
+
+        doc.setFontSize(14);
+        doc.text("Items:", 14, y);
+        y += 5;
+
+        const itemRows = order.items.map((item: any) => [
+          item.product.name,
+          item.quantity,
+          `$${item.price}`,
+        ]);
+
+        autoTable(doc, {
+          startY: y,
+          head: [["Product", "Qty", "Price"]],
+          body: itemRows,
+        });
+
+        y = (doc as any).lastAutoTable.finalY + 10;
+
+        if (index !== orders.length - 1) {
+          doc.addPage();
+          y = 20;
+        }
+      });
+
+      doc.save("full-orders-report.pdf");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to generate PDF");
+    }
+  };
+
+  const generateMembersReport = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const emailRes = await axios.get(
+        "http://localhost:3000/api/v1/user/verified-users",
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const googleRes = await axios.get(
+        "http://localhost:3000/api/get-google-users",
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const emailUsers = emailRes.data.users.map((u: any) => ({
+        id: u._id,
+        name: u.userName,
+        email: u.userEmail,
+        provider: "Email & Password",
+        createdAt: u.createdAt,
+        isBlocked: u.isBlocked,
+      }));
+
+      const googleUsers = googleRes.data.users.map((u: any) => ({
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        provider: "Google",
+        createdAt: u.createdAt,
+        isBlocked: u.isBlocked,
+      }));
+
+      const allMembers = [...emailUsers, ...googleUsers];
+
+      if (allMembers.length === 0) {
+        alert("No members found!");
+        return;
+      }
+
+      const { jsPDF } = await import("jspdf");
+      const autoTable = (await import("jspdf-autotable")).default;
+
+      const doc = new jsPDF();
+
+      doc.setFontSize(18);
+      doc.text("MEMBERS REPORT", 14, 20);
+
+      const tableBody = allMembers.map((m) => [
+        m.id.slice(-6),
+        m.name,
+        m.email,
+        m.provider,
+        new Date(m.createdAt).toLocaleDateString(),
+        m.isBlocked ? "Blocked" : "Active",
+      ]);
+
+      autoTable(doc, {
+        startY: 30,
+        head: [["ID", "Name", "Email", "Provider", "Joined On", "Status"]],
+        body: tableBody,
+        styles: { fontSize: 10 },
+        headStyles: { fillColor: [100, 81, 204] },
+        theme: "grid",
+      });
+
+      doc.save("members-report.pdf");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to generate PDF");
+    }
+  };
+
+  const generateProductsReport = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.get("http://localhost:3000/api/v1/products", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const products = res.data;
+
+      if (products.length === 0) {
+        alert("No products found!");
+        return;
+      }
+
+      const { jsPDF } = await import("jspdf");
+      const autoTable = (await import("jspdf-autotable")).default;
+
+      const doc = new jsPDF();
+
+      doc.setFontSize(18);
+      doc.text("PRODUCTS REPORT", 14, 20);
+
+      const tableBody = products.map((p: any) => [
+        p._id.slice(-6),
+        p.name,
+        p.category,
+        p.price,
+        p.discountPrice || "-",
+        p.stock,
+        new Date(p.createdAt).toLocaleDateString(),
+      ]);
+
+      autoTable(doc, {
+        startY: 30,
+        head: [
+          [
+            "ID",
+            "Name",
+            "Category",
+            "Price",
+            "Discount",
+            "Stock",
+            "Created On",
+          ],
+        ],
+        body: tableBody,
+        styles: { fontSize: 10 },
+        headStyles: { fillColor: [100, 81, 204] },
+        theme: "grid",
+      });
+
+      doc.save("products-report.pdf");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to generate product PDF");
+    }
+  };
 
   return (
     <div
@@ -183,13 +437,16 @@ min-h-screen flex"
         </nav>
         <div className="mb-3 flex flex-col items-center gap-2 border-t-2 border-gray-300 pt-4">
           <img
-            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTYhx7KkbOf5IBOgWi_XJqHxiy8wDZmpJeebA&s"
+            src={
+              admin.profileImage ||
+              "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR233AdxQNGX7tQYvWj2gvoa92YNOU8y3zDzw&s"
+            }
             alt="Admin Profile"
             className="w-16 h-16 rounded-full object-cover border-2 border-gray-400"
           />
           <div className="text-center">
-            <p className="text-md font-medium">Emily Jonson</p>
-            <p className="text-sm text-gray-400">jonson@bress.com</p>
+            <p className="text-md font-medium">{admin.name}</p>
+            <p className="text-sm text-gray-400">{admin.email}</p>
           </div>
         </div>
       </aside>
@@ -229,6 +486,7 @@ min-h-screen flex"
               <div className="absolute right-0 mt-2 w-48 z-50 bg-white border border-gray-400 rounded-xl shadow-2xl ring-1 ring-black/5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 origin-top-right transform scale-95 group-hover:scale-100">
                 <a
                   href="#"
+                  onClick={generateMembersReport}
                   className="block px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-200 hover:text-black rounded-t-xl"
                 >
                   <FontAwesomeIcon icon={faChartSimple} className="mr-2" />
@@ -236,13 +494,16 @@ min-h-screen flex"
                 </a>
                 <a
                   href="#"
+                  onClick={generateOrdersReport}
                   className="block px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-200 hover:text-black"
                 >
                   <FontAwesomeIcon icon={faChartLine} className="mr-2" />
                   Orders Report
                 </a>
+
                 <a
                   href="#"
+                  onClick={generateProductsReport}
                   className="block px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-200 hover:text-black rounded-b-xl"
                 >
                   <FontAwesomeIcon icon={faStar} className="mr-2" />
@@ -260,34 +521,145 @@ min-h-screen flex"
               <div className="absolute right-0 mt-3 z-50 w-48 bg-white border border-gray-400 rounded-xl shadow-2xl ring-1 ring-black/5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 origin-top-right transform scale-95 group-hover:scale-100">
                 <a
                   href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setFormData({
+                      name: admin.name,
+                      email: admin.email,
+                      profileImage: admin.profileImage,
+                      profileImageFile: null,
+                      userPassword: "",
+                    });
+
+                    setIsModalOpen(true);
+                  }}
                   className="block px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-200 rounded-t-xl"
                 >
                   <FontAwesomeIcon icon={faIdBadge} className="mr-2" />
                   Manage Account
                 </a>
-                <a
-                  href="#"
-                  className="block px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-200"
-                >
-                  <FontAwesomeIcon icon={faKey} className="mr-2" />
-                  Credentials
-                </a>
-                <a
-                  href="#"
-                  className="block border-t border-gray-200 px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 rounded-b-xl"
+
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left block border-t border-gray-200 px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 rounded-b-xl"
                 >
                   <FontAwesomeIcon
                     icon={faArrowRightFromBracket}
                     className="mr-2"
                   />
                   Logout
-                </a>
+                </button>
               </div>
             </div>
           </div>
         </div>
         <Outlet />
       </main>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-96 relative">
+            <h2 className="text-lg font-semibold mb-4">Update Profile</h2>
+
+            <label className="block mb-2 text-sm font-medium">Name</label>
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, name: e.target.value }))
+              }
+              className="w-full mb-3 px-3 py-2 border rounded"
+            />
+
+            <label className="block mb-2 text-sm font-medium">Email</label>
+            <input
+              type="email"
+              value={formData.email}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, email: e.target.value }))
+              }
+              className="w-full mb-3 px-3 py-2 border rounded"
+            />
+
+            <label className="block mb-2 text-sm font-medium">
+              Profile Image
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                if (e.target.files && e.target.files[0]) {
+                  setFormData((prev) => ({
+                    ...prev,
+                    name: admin.name,
+                    email: admin.email,
+                    profileImage: admin.profileImage,
+                  }));
+                }
+              }}
+              className="w-full mb-3"
+            />
+
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400"
+                onClick={() => setIsModalOpen(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 rounded bg-slate-800 text-white hover:bg-slate-900"
+                onClick={async () => {
+                  try {
+                    const token = localStorage.getItem("token");
+                    if (!token) return alert("You must be logged in");
+
+                    const formDataObj = new FormData();
+                    formDataObj.append("userName", formData.name);
+                    formDataObj.append("userEmail", formData.email);
+
+                    if (formData.profileImageFile) {
+                      formDataObj.append(
+                        "profileImage",
+                        formData.profileImageFile
+                      );
+                    }
+
+                    if (formData.userPassword) {
+                      formDataObj.append("userPassword", formData.userPassword);
+                    }
+
+                    const res = await axios.put(
+                      `http://localhost:3000/api/v1/admin/update-profile/${admin._id}`,
+                      formDataObj,
+                      {
+                        headers: {
+                          Authorization: `Bearer ${token}`,
+                          "Content-Type": "multipart/form-data",
+                        },
+                      }
+                    );
+
+                    setAdmin({
+                      name: res.data.user.userName,
+                      email: res.data.user.userEmail,
+                      profileImage: res.data.user.profileImage,
+                      _id: res.data.user._id,
+                    });
+                    setIsModalOpen(false);
+                    alert("Profile updated successfully!");
+                  } catch (err) {
+                    console.error(err);
+                    alert("Failed to update profile");
+                  }
+                }}
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

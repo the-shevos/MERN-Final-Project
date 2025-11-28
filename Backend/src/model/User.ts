@@ -17,6 +17,7 @@ export interface IUser extends Document {
   resetPasswordToken?: string | null;
   resetPasswordExpires?: Date | null;
   refreshToken?: string | null;
+  profileImage?: string;
 }
 
 const userSchema = new Schema<IUser>(
@@ -75,6 +76,10 @@ const userSchema = new Schema<IUser>(
     refreshToken: {
       type: String,
       default: null,
+    },
+    profileImage: {
+      type: String,
+      default: "",
     },
   },
   { timestamps: true }
