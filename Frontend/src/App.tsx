@@ -8,6 +8,7 @@ import DashboardHome from "./page/DashboardHome";
 import Members from "./page/Members";
 import ProductPage from "./page/ProductPage";
 import OrdersPage from "./page/OrdersPage";
+import UserProductPage from "./page/Product";
 
 export default function App() {
   return (
@@ -15,6 +16,8 @@ export default function App() {
       <Routes>
         <Route path="/" element={<AuthPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/product" element={<UserProductPage />} />
+
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/dashboard" element={<Dashboard />}>
           <Route index element={<DashboardHome />} />

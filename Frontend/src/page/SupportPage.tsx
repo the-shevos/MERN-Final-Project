@@ -14,6 +14,8 @@ const Support = () => {
   const [loading, setLoading] = useState(true);
   const [replyingToId, setReplyingToId] = useState<string | null>(null);
   const [replyMessage, setReplyMessage] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const cardsPerPage = 6;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -33,7 +35,7 @@ const Support = () => {
 
   if (loading) {
     return (
-      <div className="text-center text-white mt-10">
+      <div className="text-center text-white mt-10 text-xl">
         Loading contact requests...
       </div>
     );
@@ -56,45 +58,72 @@ const Support = () => {
     }
   };
 
+  const indexOfLastCard = currentPage * cardsPerPage;
+  const indexOfFirstCard = indexOfLastCard - cardsPerPage;
+  const currentCards = cardsData.slice(indexOfFirstCard, indexOfLastCard);
+  const totalPages = Math.ceil(cardsData.length / cardsPerPage);
+
+  const nextPage = () => {
+    if (currentPage < totalPages) setCurrentPage((p) => p + 1);
+  };
+
+  const prevPage = () => {
+    if (currentPage > 1) setCurrentPage((p) => p - 1);
+  };
+
   return (
-    <div className="bg-slate-600 rounded-3xl p-8 text-white max-w-6xl mx-auto mt-10">
-      <h1 className="text-3xl font-semibold text-center mb-10">
-        Contact Support
+    <div className="max-w-7xl mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-8 text-center text-purple-700">
+        Contact Support Requests
       </h1>
 
-      <div className="flex flex-wrap justify-center gap-6">
-        {cardsData.map((card) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 justify-items-center">
+        {currentCards.map((card) => (
           <div
             key={card._id}
-            className="bg-white text-gray-800 rounded-2xl p-6 w-72 shadow-lg transform hover:scale-105 transition-transform"
+            className="bg-white rounded-3xl border border-gray-300 shadow-md hover:shadow-xl transition-shadow w-80 flex flex-col text-center"
           >
-            <h3 className="font-medium text-lg mb-2">{card.name}</h3>
-            <p className="text-gray-500 text-sm mb-2">{card.email}</p>
-            <p className="text-gray-700 text-sm">{card.message}</p>
-            <p className="text-xs text-gray-400 mt-2">
-              Submitted: {new Date(card.createdAt).toLocaleString()}
-            </p>
+            <div className="p-8 flex flex-col flex-grow">
+              <h2 className="text-3xl font-semibold text-purple-600 mb-2">
+                {card.name}
+              </h2>
 
-            {replyingToId !== card._id && (
-              <button
-                className="mt-3 px-4 py-1 bg-purple-600 text-white rounded hover:bg-purple-700"
-                onClick={() => setReplyingToId(card._id)}
-              >
-                Reply
-              </button>
-            )}
+              <p className="text-gray-600 text-base mb-2">{card.email}</p>
+              <p className="text-gray-700 text-base mb-4">{card.message}</p>
 
-            {replyingToId === card._id && (
-              <div className="mt-3">
+              <p className="text-gray-400 text-sm mb-4">
+                Submitted: {new Date(card.createdAt).toLocaleString()}
+              </p>
+
+              {replyingToId !== card._id && (
+                <button
+                  className="px-5 py-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition-colors shadow-md hover:shadow-lg"
+                  onClick={() => setReplyingToId(card._id)}
+                >
+                  Reply
+                </button>
+              )}
+            </div>
+
+            <div
+              className={`overflow-hidden transition-all duration-500 ease-in-out w-full ${
+                replyingToId === card._id
+                  ? "max-h-[500px] opacity-100 mt-0"
+                  : "max-h-0 opacity-0 mt-0"
+              }`}
+            >
+              <div className="p-4 flex flex-col gap-3">
                 <textarea
-                  className="w-full border rounded p-2 text-gray-800"
+                  className="w-full border border-gray-300 rounded-2xl p-3 text-gray-800 resize-none shadow-sm focus:outline-none focus:border-2 focus:border-purple-500 text-base transition-all"
                   placeholder="Type your reply here..."
                   value={replyMessage}
                   onChange={(e) => setReplyMessage(e.target.value)}
+                  rows={5}
                 />
-                <div className="flex justify-end gap-2 mt-2">
+
+                <div className="flex justify-end gap-3">
                   <button
-                    className="px-4 py-1 bg-gray-400 text-white rounded hover:bg-gray-500"
+                    className="px-5 py-2 w-24 bg-red-300/60 text-red-700 rounded-2xl hover:bg-red-300 transition-colors shadow-sm hover:shadow-md"
                     onClick={() => {
                       setReplyingToId(null);
                       setReplyMessage("");
@@ -102,17 +131,40 @@ const Support = () => {
                   >
                     Cancel
                   </button>
+
                   <button
-                    className="px-4 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+                    className="px-5 py-2 w-28 bg-green-600 text-white rounded-2xl hover:bg-green-700 transition-colors shadow-sm hover:shadow-md"
                     onClick={() => handleSendReply(card)}
                   >
-                    Send Reply
+                    Send
                   </button>
                 </div>
               </div>
-            )}
+            </div>
           </div>
         ))}
+      </div>
+
+      <div className="flex justify-center mt-10 gap-4">
+        <button
+          onClick={prevPage}
+          disabled={currentPage === 1}
+          className="px-4 py-2 rounded-lg bg-gray-300 text-gray-700 hover:bg-gray-400 disabled:opacity-50"
+        >
+          Previous
+        </button>
+
+        <span className="px-3 py-2 text-gray-700 font-medium">
+          Page {currentPage} of {totalPages}
+        </span>
+
+        <button
+          onClick={nextPage}
+          disabled={currentPage === totalPages}
+          className="px-4 py-2 rounded-lg bg-gray-300 text-gray-700 hover:bg-gray-400 disabled:opacity-50"
+        >
+          Next
+        </button>
       </div>
     </div>
   );

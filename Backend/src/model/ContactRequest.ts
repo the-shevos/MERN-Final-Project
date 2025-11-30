@@ -4,7 +4,9 @@ export interface IContactRequest extends Document {
   name: string;
   email: string;
   message: string;
+  isRead: boolean; 
   createdAt: Date;
+  updatedAt: Date;
 }
 
 const contactRequestSchema = new Schema<IContactRequest>(
@@ -17,6 +19,7 @@ const contactRequestSchema = new Schema<IContactRequest>(
       match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Enter a valid email address"],
     },
     message: { type: String, required: true, trim: true },
+    isRead: { type: Boolean, default: false }, // ← important for new contact count
   },
   { timestamps: true }
 );

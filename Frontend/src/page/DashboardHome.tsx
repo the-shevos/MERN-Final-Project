@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { ResponsiveContainer } from "recharts";
 import axios from "axios";
 import {
   LineChart,
@@ -8,16 +9,19 @@ import {
   CartesianGrid,
   Tooltip,
 } from "recharts";
+
 interface Product {
   _id: string;
   name: string;
   images: string[];
   price: number;
 }
+
 interface OrderItem {
   product: Product;
   quantity: number;
 }
+
 interface Order {
   _id: string;
   user: string;
@@ -28,6 +32,7 @@ interface Order {
   paymentMethod: string;
   shippingAddress: string;
 }
+
 const DashboardHome = () => {
   const [latestOrders, setLatestOrders] = useState<Order[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -37,12 +42,14 @@ const DashboardHome = () => {
   const [chartData, setChartData] = useState<
     { day: string; InProgress: number; Completed: number }[]
   >([]);
+  const [contacts, setContacts] = useState([]);
+  const [visibleIndex, setVisibleIndex] = useState(0);
+
   const fetchLatestOrders = async () => {
     try {
       const res = await axios.get("http://localhost:3000/api/v1/orders/latest");
       const orders = res.data;
       setLatestOrders(orders);
-      // Compute chart data from real orders
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - 6);
       const days: string[] = [];
@@ -78,15 +85,28 @@ const DashboardHome = () => {
       console.error(err);
     }
   };
+
+  const loadContacts = async () => {
+    const res = await axios.get("http://localhost:3000/api/v1/contact/limit");
+    setContacts(res.data);
+  };
+
+  useEffect(() => {
+    loadContacts();
+  }, []);
+
   useEffect(() => {
     fetchLatestOrders();
   }, []);
+
   const getTotalQuantity = (items: OrderItem[]) =>
     items.reduce((sum, item) => sum + item.quantity, 0);
+
   const filteredOrders =
     activeTab === "all"
       ? latestOrders
       : latestOrders.filter((o) => o.status === activeTab);
+
   const pendingCount = latestOrders.filter(
     (o) => o.status === "pending"
   ).length;
@@ -96,6 +116,7 @@ const DashboardHome = () => {
   const completedCount = latestOrders.filter(
     (o) => o.status === "completed"
   ).length;
+
   const startDate = new Date();
   startDate.setDate(startDate.getDate() - 6);
   const startStr = startDate.toLocaleDateString("en-US", {
@@ -107,11 +128,36 @@ const DashboardHome = () => {
     month: "short",
   });
   const dateRange = `${startStr} - ${endStr}`;
+
+  useEffect(() => {
+    if (selectedOrder) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [selectedOrder]);
+
+  useEffect(() => {
+    if (contacts.length === 0) return;
+    const interval = setInterval(() => {
+      setVisibleIndex((prev) => (prev + 2) % contacts.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [contacts]);
+
+  const visibleContacts = contacts.slice(visibleIndex, visibleIndex + 2);
+  if (visibleContacts.length < 2) {
+    visibleContacts.push(...contacts.slice(0, 2 - visibleContacts.length));
+  }
+
   return (
     <>
-      <div className="bg-white rounded-3xl p-7 shadow-xl border border-gray-400/90">
-        <div className="flex items-center justify-between mb-8 relative">
-          <div className="flex gap-6">
+      <div className="bg-white rounded-3xl p-8 shadow-2xl border border-gray-200">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-6">
+          <div className="flex gap-6 overflow-x-auto">
             {[
               { label: "All Tasks", value: "all" },
               { label: "Completed", value: "completed" },
@@ -121,217 +167,271 @@ const DashboardHome = () => {
               <button
                 key={tab.value}
                 onClick={() => setActiveTab(tab.value as any)}
-                className={`pb-2 font-semibold transition-all ${
+                className={`pb-2 font-semibold text-lg transition-all ${
                   activeTab === tab.value
-                    ? "text-gray-600 border-b-2 border-gray-600"
-                    : "text-gray-500 hover:text-gray-700"
+                    ? "text-indigo-600 border-b-2 border-indigo-600"
+                    : "text-gray-500 hover:text-indigo-600"
                 }`}
               >
                 {tab.label}
               </button>
             ))}
           </div>
-          <div className="flex justify-center items-center gap-10">
-            <div className="flex items-center gap-10">
-              <div className="flex flex-col items-center">
-                <p className="text-4xl font-bold text-gray-800">
-                  {pendingCount}
+
+          <div className="flex items-center gap-4 justify-center md:justify-end">
+            {[
+              { label: "Pending", count: pendingCount, color: "yellow" },
+              { label: "Processing", count: inProgressCount, color: "blue" },
+              { label: "Complete", count: completedCount, color: "green" },
+            ].map((stat) => (
+              <div
+                key={stat.label}
+                className={`flex flex-col items-center px-5 py-2 rounded-2xl shadow-md border border-gray-100 transition-all hover:scale-105 ${
+                  stat.color === "yellow"
+                    ? "bg-yellow-50"
+                    : stat.color === "blue"
+                    ? "bg-blue-50"
+                    : "bg-green-50"
+                }`}
+              >
+                <p
+                  className={`text-3xl md:text-4xl font-bold ${
+                    stat.color === "yellow"
+                      ? "text-yellow-700"
+                      : stat.color === "blue"
+                      ? "text-blue-700"
+                      : "text-green-700"
+                  }`}
+                >
+                  {stat.count}
                 </p>
-                <p className="text-gray-500 text-sm mt-1">Pending</p>
+                <p className="text-gray-500 text-sm mt-1">{stat.label}</p>
               </div>
-              <div className="w-px h-12 bg-gray-300"></div>
-              <div className="flex flex-col items-center">
-                <p className="text-4xl font-bold text-gray-800">
-                  {completedCount}
-                </p>
-                <p className="text-gray-500 text-sm mt-1">Done</p>
-              </div>
-              <div className="w-px h-12 bg-gray-300"></div>
-              <div className="flex flex-col items-center">
-                <p className="text-4xl font-bold text-gray-800">
-                  {inProgressCount}
-                </p>
-                <p className="text-gray-500 text-sm mt-1">Processing</p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
-        <div className="overflow-hidden rounded-2xl border border-gray-100">
-          <table className="w-full">
-            <thead className="bg-gray-200">
-              <tr className="text-left text-gray-500 text-xs uppercase tracking-wide">
-                <th className="py-3 px-4 font-medium">Order</th>
-                <th className="py-3 px-4 font-medium">User</th>
-                <th className="py-3 px-4 font-medium">Quantity</th>
-                <th className="py-3 px-4 font-medium">Status</th>
-                <th className="py-3 px-4 font-medium">Date</th>
-                <th className="py-3 px-4 font-medium">Total</th>
+
+        <div className="overflow-x-auto rounded-3xl shadow-lg border border-gray-300 bg-white">
+          <table className="w-full min-w-[700px] text-sm text-left">
+            <thead className="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-500 text-white rounded-t-3xl">
+              <tr className="uppercase tracking-wide text-xs">
+                <th className="py-3 px-6 font-medium text-center">Order</th>
+                <th className="py-3 px-6 font-medium text-center">User</th>
+                <th className="py-3 px-6 font-medium text-center">Quantity</th>
+                <th className="py-3 px-6 font-medium text-center">Status</th>
+                <th className="py-3 px-6 font-medium text-center">Date</th>
+                <th className="py-3 px-6 font-medium text-center">Total</th>
               </tr>
             </thead>
-            <tbody className="text-sm">
+            <tbody className="divide-y divide-gray-100">
               {filteredOrders.map((order) => (
                 <tr
                   key={order._id}
-                  className="border-t hover:bg-gray-50 transition-all cursor-pointer"
+                  className="hover:bg-indigo-50 transition-all cursor-pointer"
                   onClick={() => setSelectedOrder(order)}
                 >
-                  <td className="py-4 px-4 font-medium text-gray-700">
-                    Order #{order._id.slice(-6)}
+                  <td className="py-4 px-6 font-medium text-gray-700 text-center">
+                    #{order._id.slice(-6)}
                   </td>
-                  <td className="py-4 px-4 text-gray-600">{order.user}</td>
-                  <td className="py-4 px-4 text-gray-600">
+                  <td className="py-4 px-6 text-gray-600 text-center">
+                    {order.user}
+                  </td>
+                  <td className="py-4 px-6 text-gray-600 text-center">
                     {getTotalQuantity(order.items)}
                   </td>
-                  <td className="py-4 px-4">
+                  <td className="py-4 px-6 text-center">
                     <span
-                      className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${
+                      className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-semibold ${
                         order.status === "pending"
-                          ? "bg-yellow-100 text-yellow-700"
+                          ? "bg-yellow-200 text-yellow-800"
                           : order.status === "in-progress"
-                          ? "bg-blue-100 text-blue-700"
+                          ? "bg-blue-200 text-blue-800"
                           : order.status === "completed"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
+                          ? "bg-green-200 text-green-800"
+                          : "bg-red-200 text-red-800"
                       }`}
                     >
-                      <span className="w-2 h-2 rounded-full bg-current"></span>
-                      {order.status}
+                      <span className="w-2 h-2 rounded-full bg-current animate-pulse"></span>
+                      {order.status.replace("-", " ")}
                     </span>
                   </td>
-                  <td className="py-4 px-4 text-gray-500">
+                  <td className="py-4 px-6 text-gray-500 text-center">
                     {new Date(order.createdAt).toLocaleDateString()}
                   </td>
-                  <td className="py-4 px-4 text-gray-500">
-                    ${order.totalAmount}
+                  <td className="py-4 px-6 text-gray-500 text-center">
+                    ${order.totalAmount.toFixed(2)}
                   </td>
                 </tr>
               ))}
-              {filteredOrders.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={6}
-                    className="text-center py-6 text-gray-400 italic"
-                  >
-                    No recent orders found.
-                  </td>
-                </tr>
-              )}
             </tbody>
           </table>
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-4 mt-6">
-        <div className="bg-white rounded-3xl p-8 border border-gray-600 w-[600px]">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-lg font-semibold">Order Progress</h2>
+
+      <div className="grid grid-cols-12 gap-6 mt-6">
+        <div className="col-span-8 bg-white rounded-3xl p-6 shadow-lg border border-gray-100">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-800">Order Progress</h2>
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 text-sm">
-                <span className="w-2 h-2 rounded-full bg-cyan-400"></span>In
-                Progress
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 text-sm font-medium text-gray-600">
+                  <span className="w-3 h-3 rounded-full bg-cyan-400"></span>In
+                  Progress
+                </div>
+                <div className="flex items-center gap-2 text-sm font-medium text-gray-600">
+                  <span className="w-3 h-3 rounded-full bg-slate-800"></span>
+                  Completed
+                </div>
               </div>
-              <div className="flex items-center gap-2 text-sm">
-                <span className="w-2 h-2 rounded-full bg-slate-800"></span>
-                Completed
-              </div>
-              <div className="bg-gray-300 rounded-lg px-3 py-1 text-sm flex items-center gap-1 cursor-pointer">
+              <div className="bg-gray-100 text-gray-700 rounded-lg px-4 py-1 text-sm font-medium cursor-pointer hover:bg-gray-200 transition-colors">
                 {dateRange}
               </div>
             </div>
           </div>
-          <p className="text-xs text-gray-400 mb-6">
-            Data updates every 3 hours
-          </p>
-          <div className="relative h-42">
-            <LineChart
-              width={550}
-              height={168}
-              data={chartData}
-              margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="day" tick={{ fontSize: 12 }} />
-              <YAxis
-                domain={[0, "dataMax + 1"]}
-                allowDecimals={false}
-                tick={{ fontSize: 12 }}
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "white",
-                  border: "1px solid #ccc",
-                  borderRadius: "4px",
-                  padding: "8px",
-                }}
-                itemStyle={{ color: "#333" }}
-              />
-              <Line
-                type="monotone"
-                dataKey="InProgress"
-                stroke="#22d3ee"
-                strokeWidth={2}
-                activeDot={{ r: 8, fill: "#22d3ee", stroke: "white" }}
-                dot={{ r: 4, fill: "#22d3ee", stroke: "white" }}
-              />
-              <Line
-                type="monotone"
-                dataKey="Completed"
-                stroke="#1e293b"
-                strokeWidth={2}
-                activeDot={{ r: 8, fill: "#1e293b", stroke: "white" }}
-                dot={{ r: 4, fill: "#1e293b", stroke: "white" }}
-              />
-            </LineChart>
+
+          <div className="w-full h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart
+                data={chartData}
+                margin={{ top: 10, right: 20, left: 0, bottom: 10 }}
+              >
+                <defs>
+                  <linearGradient
+                    id="colorInProgress"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop offset="0%" stopColor="#22d3ee" stopOpacity={0.4} />
+                    <stop offset="100%" stopColor="#22d3ee" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient
+                    id="colorCompleted"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop offset="0%" stopColor="#1e293b" stopOpacity={0.4} />
+                    <stop offset="100%" stopColor="#1e293b" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="#e5e7eb"
+                  vertical={false}
+                />
+                <XAxis dataKey="day" tick={{ fontSize: 12, fill: "#6b7280" }} />
+                <YAxis
+                  domain={[0, "dataMax + 1"]}
+                  allowDecimals={false}
+                  tick={{ fontSize: 12, fill: "#6b7280" }}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#f9fafb",
+                    border: "1px solid #d1d5db",
+                    borderRadius: "8px",
+                    padding: "10px",
+                  }}
+                  labelStyle={{ fontWeight: "bold", color: "#111827" }}
+                  itemStyle={{ color: "#111827", fontWeight: 500 }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="InProgress"
+                  stroke="#22d3ee"
+                  strokeWidth={3}
+                  dot={{ r: 4, fill: "#22d3ee", stroke: "white" }}
+                  activeDot={{ r: 6, fill: "#22d3ee", stroke: "white" }}
+                  fill="url(#colorInProgress)"
+                  fillOpacity={1}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="Completed"
+                  stroke="#1e293b"
+                  strokeWidth={3}
+                  dot={{ r: 4, fill: "#1e293b", stroke: "white" }}
+                  activeDot={{ r: 6, fill: "#1e293b", stroke: "white" }}
+                  fill="url(#colorCompleted)"
+                  fillOpacity={1}
+                />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
         </div>
-        <div className="bg-slate-800 rounded-3xl p-8 text-white relative">
-          <h2 className="text-[22px] font-semibold mb-6">
-            Assistance for Contact Support
+
+        <div className="col-span-4 bg-gradient-to-b from-slate-700 to-slate-900 rounded-2xl p-4 shadow-lg">
+          <h2 className="text-lg font-bold text-white mb-3 text-center">
+            Contact Support
           </h2>
-          <div id="card-container" className="relative h-40">
-            <div className="bg-white rounded-2xl p-4 text-gray-800 absolute inset-0 opacity-100">
-              <h3 className="font-medium mb-1">John Doe</h3>
-              <p className="text-gray-500 text-sm mb-2">john@example.com</p>
-              <p className="text-gray-700 text-sm">Task: Setup dashboard</p>
-            </div>
+          <div className="grid grid-cols-1 gap-3">
+            {visibleContacts.map((c) => (
+              <div
+                key={c._id}
+                className="group bg-white rounded-xl shadow-md p-4 relative overflow-hidden border border-gray-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col items-center justify-center"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-100/30 to-purple-100/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+                <div className="relative z-10 flex flex-col items-center text-center gap-1">
+                  <h3 className="font-semibold text-lg text-indigo-700 transition-colors">
+                    {c.name}
+                  </h3>
+                  <p className="text-gray-500 text-xs">{c.email}</p>
+                  <p className="text-gray-600 text-md mt-1">
+                    <span className="font-medium text-gray-700">Message: </span>
+                    {c.message}
+                  </p>
+                  <p className="text-gray-400 text-[10px] mt-1">
+                    {new Date(c.createdAt).toLocaleString()}
+                  </p>
+                </div>
+                <div className="absolute top-0 right-0 h-full w-1.5 bg-indigo-500 rounded-r-xl group-hover:w-2 transition-all duration-300"></div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
+
       {selectedOrder && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-4xl p-6 overflow-auto max-h-[90vh] relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 transition-opacity duration-300">
+          <div className="bg-white rounded-3xl w-full max-w-4xl p-6 overflow-auto max-h-[90vh] relative shadow-2xl animate-fadeIn">
             <button
-              className="absolute top-3 right-3 text-gray-600 font-bold text-2xl"
+              className="absolute top-4 right-4 text-gray-600 font-bold text-3xl hover:text-gray-800 transition-all"
               onClick={() => setSelectedOrder(null)}
             >
               &times;
             </button>
-            <h2 className="text-2xl font-bold mb-4 text-gray-800">
+            <h2 className="text-3xl font-bold mb-6 text-gray-800 border-b pb-3">
               Order Details #{selectedOrder._id.slice(-6)}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-gray-700 text-sm">
               <p>
-                <span className="font-medium">User:</span> {selectedOrder.user}
+                <span className="font-medium text-gray-800">User:</span>{" "}
+                {selectedOrder.user}
               </p>
               <p>
-                <span className="font-medium">Payment:</span>{" "}
+                <span className="font-medium text-gray-800">Payment:</span>{" "}
                 {selectedOrder.paymentMethod}
               </p>
               <p>
-                <span className="font-medium">Total Amount:</span> $
-                {selectedOrder.totalAmount}
+                <span className="font-medium text-gray-800">Total Amount:</span>{" "}
+                ${selectedOrder.totalAmount}
               </p>
               <p>
-                <span className="font-medium">Shipping:</span>{" "}
+                <span className="font-medium text-gray-800">Shipping:</span>{" "}
                 {selectedOrder.shippingAddress}
               </p>
               <p>
-                <span className="font-medium">Created At:</span>{" "}
+                <span className="font-medium text-gray-800">Created At:</span>{" "}
                 {new Date(selectedOrder.createdAt).toLocaleString()}
               </p>
               <p>
-                <span className="font-medium">Status:</span>{" "}
+                <span className="font-medium text-gray-800">Status:</span>{" "}
                 <span
-                  className={`px-2 py-1 rounded-full text-sm font-medium ${
+                  className={`px-3 py-1 rounded-full text-sm font-semibold ${
                     selectedOrder.status === "pending"
                       ? "bg-yellow-200 text-yellow-800"
                       : selectedOrder.status === "in-progress"
@@ -345,21 +445,25 @@ const DashboardHome = () => {
                 </span>
               </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+
+            <h3 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">
+              Items in Order
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {selectedOrder.items.map((item, idx) => (
                 <div
                   key={idx}
-                  className="bg-gray-50 rounded-xl shadow p-4 flex items-center gap-4"
+                  className="bg-gray-200 rounded-2xl transition-all p-4 flex items-center gap-4 border border-gray-100 w-72"
                 >
                   {item.product.images[0] && (
                     <img
                       src={item.product.images[0]}
                       alt={item.product.name}
-                      className="w-20 h-20 object-cover rounded-lg"
+                      className="w-24 h-24 object-cover rounded-xl"
                     />
                   )}
                   <div className="flex flex-col">
-                    <h4 className="font-semibold text-gray-800">
+                    <h4 className="font-semibold text-gray-800 text-lg hover:text-indigo-600 transition-colors">
                       {item.product.name}
                     </h4>
                     <p className="text-gray-600">Quantity: {item.quantity}</p>
@@ -376,4 +480,5 @@ const DashboardHome = () => {
     </>
   );
 };
+
 export default DashboardHome;

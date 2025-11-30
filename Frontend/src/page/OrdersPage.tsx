@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { FaBoxOpen, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 
 interface Product {
   _id: string;
@@ -30,6 +31,8 @@ const OrdersPage = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ordersPerPage = 9;
   const token = localStorage.getItem("token");
 
   const fetchOrders = async () => {
@@ -49,6 +52,13 @@ const OrdersPage = () => {
     fetchOrders();
   }, []);
 
+  useEffect(() => {
+    document.body.style.overflow = selectedOrder ? "hidden" : "auto";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [selectedOrder]);
+
   const updateStatus = async (orderId: string, status: string) => {
     try {
       await axios.put(
@@ -65,133 +75,183 @@ const OrdersPage = () => {
   };
 
   if (loading)
-    return <p className="text-center text-white mt-10">Loading orders...</p>;
+    return (
+      <div className="text-center mt-10 text-xl text-gray-500">Loading...</div>
+    );
+
+  const indexOfLast = currentPage * ordersPerPage;
+  const indexOfFirst = indexOfLast - ordersPerPage;
+  const currentOrders = orders.slice(indexOfFirst, indexOfLast);
+  const totalPages = Math.ceil(orders.length / ordersPerPage);
+
+  const nextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  };
+  const prevPage = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <h2 className="text-3xl font-bold text-gray-800 mb-6">Orders</h2>
+    <div className="max-w-7xl mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-8 text-center text-purple-700">
+        Orders Dashboard
+      </h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {orders.map((order) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        {currentOrders.map((order) => (
           <div
             key={order._id}
-            className="bg-white rounded-2xl shadow-lg p-5 flex flex-col justify-between cursor-pointer hover:shadow-2xl transition"
-            onClick={() => setSelectedOrder(order)}
+            className="bg-white rounded-3xl border border-gray-200 shadow-md hover:shadow-xl transition p-6 flex flex-col justify-between relative"
           >
-            <div className="flex justify-between items-center mb-2">
-              <h3 className="text-lg font-semibold text-gray-800">
+            <div className="absolute bottom-4 right-4">
+              <button
+                className="text-gray-500 hover:text-gray-800 text-2xl cursor-pointer font-bold"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedOrder(order);
+                }}
+              >
+                &#x22EE;
+              </button>
+            </div>
+
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="text-lg font-semibold text-indigo-500">
                 Order #{order._id.slice(-6)}
               </h3>
               <span
                 className={`px-3 py-1 rounded-full text-sm font-medium ${
                   order.status === "pending"
-                    ? "bg-yellow-200 text-yellow-800"
+                    ? "bg-yellow-100 text-yellow-800"
                     : order.status === "in-progress"
-                    ? "bg-blue-200 text-blue-800"
+                    ? "bg-blue-100 text-blue-800"
                     : order.status === "completed"
-                    ? "bg-green-200 text-green-800"
-                    : "bg-red-200 text-red-800"
+                    ? "bg-green-100 text-green-800"
+                    : "bg-red-100 text-red-800"
                 }`}
               >
                 {order.status.toUpperCase()}
               </span>
             </div>
 
-            <div className="text-gray-600 text-sm space-y-1">
-              <p>
-                <span className="font-medium">User:</span> {order.user}
-              </p>
-              <p>
-                <span className="font-medium">Payment:</span>{" "}
-                {order.paymentMethod}
-              </p>
-              <p>
-                <span className="font-medium">Total:</span> ${order.totalAmount}
-              </p>
-              <p>
-                <span className="font-medium">Shipping:</span>{" "}
-                {order.shippingAddress}
-              </p>
-              <p>
-                <span className="font-medium">Items:</span>{" "}
-                {order.items
-                  .map((item) => `${item.product.name} (${item.quantity})`)
-                  .join(", ")}
-              </p>
-              <p className="text-gray-500 text-xs mt-1">
-                Created: {new Date(order.createdAt).toLocaleDateString()}
-              </p>
-            </div>
+            <p className="text-gray-500 mb-2 text-sm">
+              <span className="font-medium">User:</span> {order.user}
+            </p>
+            <p className="text-gray-500 mb-2 text-sm">
+              <span className="font-medium">Total:</span> ${order.totalAmount}
+            </p>
+            <p className="text-gray-500 mb-2 text-sm">
+              <span className="font-medium">Items:</span>{" "}
+              {order.items.map((i) => i.product.name).join(", ")}
+            </p>
+            <p className="text-gray-400 text-xs">
+              Created: {new Date(order.createdAt).toLocaleDateString()}
+            </p>
           </div>
         ))}
       </div>
 
+      <div className="flex justify-center mt-8 gap-4">
+        <button
+          onClick={prevPage}
+          disabled={currentPage === 1}
+          className="px-4 py-2 rounded-lg bg-gray-300 text-gray-700 hover:bg-gray-400 disabled:opacity-50"
+        >
+          Previous
+        </button>
+        <span className="px-3 py-2 text-gray-700 font-medium">
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          onClick={nextPage}
+          disabled={currentPage === totalPages}
+          className="px-4 py-2 rounded-lg bg-gray-300 text-gray-700 hover:bg-gray-400 disabled:opacity-50"
+        >
+          Next
+        </button>
+      </div>
+
+      {/* Modal */}
       {selectedOrder && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-4xl p-6 overflow-auto max-h-[90vh] relative">
-            <button
-              className="absolute top-3 right-3 text-gray-600 font-bold text-2xl"
-              onClick={() => setSelectedOrder(null)}
-            >
-              &times;
-            </button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fadeIn">
+          <div className="bg-white rounded-3xl w-full max-w-4xl p-6 overflow-auto max-h-[90vh] shadow-2xl relative border border-gray-200 transform transition-all scale-95 animate-scaleIn">
+            <div className="flex justify-between items-center border-b pb-3 mb-6">
+              <h2 className="text-2xl font-extrabold text-gray-800">
+                Order Details #{selectedOrder._id.slice(-6)}
+              </h2>
+              <button
+                className="text-gray-500 hover:text-gray-800 font-bold text-3xl transition-transform hover:scale-125"
+                onClick={() => setSelectedOrder(null)}
+              >
+                &times;
+              </button>
+            </div>
 
-            <h2 className="text-2xl font-bold mb-4 text-gray-800">
-              Order Details #{selectedOrder._id.slice(-6)}
-            </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-gray-700 text-sm">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-gray-700">
               <p>
-                <span className="font-medium">User:</span> {selectedOrder.user}
+                <span className="font-semibold">User:</span>{" "}
+                {selectedOrder.user}
               </p>
               <p>
-                <span className="font-medium">Payment:</span>{" "}
+                <span className="font-semibold">Payment:</span>{" "}
                 {selectedOrder.paymentMethod}
               </p>
               <p>
-                <span className="font-medium">Total Amount:</span> $
+                <span className="font-semibold">Total Amount:</span> $
                 {selectedOrder.totalAmount}
               </p>
               <p>
-                <span className="font-medium">Shipping:</span>{" "}
+                <span className="font-semibold">Shipping:</span>{" "}
                 {selectedOrder.shippingAddress}
               </p>
               <p>
-                <span className="font-medium">Created At:</span>{" "}
+                <span className="font-semibold">Created At:</span>{" "}
                 {new Date(selectedOrder.createdAt).toLocaleString()}
               </p>
               <p>
-                <span className="font-medium">Status:</span>{" "}
+                <span className="font-semibold">Status:</span>{" "}
                 <span
-                  className={`px-2 py-1 rounded-full text-sm font-medium ${
-                    selectedOrder.status === "pending"
-                      ? "bg-yellow-200 text-yellow-800"
-                      : selectedOrder.status === "in-progress"
-                      ? "bg-blue-200 text-blue-800"
-                      : selectedOrder.status === "completed"
-                      ? "bg-green-200 text-green-800"
-                      : "bg-red-200 text-red-800"
-                  }`}
+                  className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium
+            ${
+              selectedOrder.status === "pending"
+                ? "bg-yellow-100 text-yellow-800"
+                : selectedOrder.status === "in-progress"
+                ? "bg-blue-100 text-blue-800"
+                : selectedOrder.status === "completed"
+                ? "bg-green-100 text-green-800"
+                : "bg-red-100 text-red-800"
+            }`}
                 >
+                  {selectedOrder.status === "completed" && <FaCheckCircle />}
+                  {selectedOrder.status === "cancelled" && <FaTimesCircle />}
+                  {selectedOrder.status === "pending" && <FaBoxOpen />}
                   {selectedOrder.status.toUpperCase()}
                 </span>
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <h3 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">
+              Items
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               {selectedOrder.items.map((item, idx) => (
                 <div
                   key={idx}
-                  className="bg-gray-50 rounded-xl shadow p-4 flex items-center gap-4"
+                  className="bg-gray-50 rounded-2xl shadow hover:shadow-md p-4 flex items-center gap-4 transition transform hover:scale-[1.02]"
                 >
-                  {item.product.images[0] && (
+                  {item.product.images[0] ? (
                     <img
                       src={item.product.images[0]}
                       alt={item.product.name}
-                      className="w-20 h-20 object-cover rounded-lg"
+                      className="w-20 h-20 object-cover rounded-lg border border-gray-200"
                     />
+                  ) : (
+                    <div className="w-20 h-20 rounded-lg bg-gray-200 flex items-center justify-center text-gray-500 font-semibold">
+                      No Image
+                    </div>
                   )}
-                  <div className="flex flex-col">
+                  <div className="flex flex-col flex-1">
                     <h4 className="font-semibold text-gray-800">
                       {item.product.name}
                     </h4>
@@ -202,11 +262,11 @@ const OrdersPage = () => {
               ))}
             </div>
 
-            <div className="flex gap-2 mt-4">
+            <div className="flex flex-col sm:flex-row gap-3 mt-4">
               {selectedOrder.status === "pending" && (
                 <>
                   <button
-                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+                    className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white py-2 rounded-2xl hover:from-blue-600 hover:to-blue-700 transition transform hover:scale-[1.02]"
                     onClick={() =>
                       updateStatus(selectedOrder._id, "in-progress")
                     }
@@ -214,24 +274,23 @@ const OrdersPage = () => {
                     Start Progress
                   </button>
                   <button
-                    className="flex-1 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+                    className="flex-1 bg-gradient-to-r from-red-500 to-red-600 text-white py-2 rounded-2xl hover:from-red-600 hover:to-red-700 transition transform hover:scale-[1.02]"
                     onClick={() => updateStatus(selectedOrder._id, "cancelled")}
                   >
                     Cancel
                   </button>
                 </>
               )}
-
               {selectedOrder.status === "in-progress" && (
                 <>
                   <button
-                    className="flex-1 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
+                    className="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white py-2 rounded-2xl hover:from-green-600 hover:to-green-700 transition transform hover:scale-[1.02]"
                     onClick={() => updateStatus(selectedOrder._id, "completed")}
                   >
                     Complete
                   </button>
                   <button
-                    className="flex-1 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+                    className="flex-1 bg-gradient-to-r from-red-500 to-red-600 text-white py-2 rounded-2xl hover:from-red-600 hover:to-red-700 transition transform hover:scale-[1.02]"
                     onClick={() => updateStatus(selectedOrder._id, "cancelled")}
                   >
                     Cancel
