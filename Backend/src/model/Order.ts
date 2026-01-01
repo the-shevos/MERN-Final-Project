@@ -1,25 +1,39 @@
 import mongoose, { Schema, Document } from "mongoose";
 
+/* ---------------- Order Item Interface ---------------- */
 export interface IOrderItem {
-  product: string;
+  product: mongoose.Types.ObjectId;
   quantity: number;
   price: number;
 }
 
+/* ---------------- Shipping Address Interface ---------------- */
+export interface IShippingAddress {
+  address: string;
+  country: string;
+  phone: string;
+}
+
+/* ---------------- Order Interface ---------------- */
 export interface IOrder extends Document {
-  user: string;
+  user: mongoose.Types.ObjectId;
   items: IOrderItem[];
   totalAmount: number;
-  paymentMethod: string;
-  shippingAddress: string;
-  status: string; 
+  paymentMethod: "cash" | "card" | "online";
+  shippingAddress: IShippingAddress;
+  status: "pending" | "in-progress" | "completed" | "cancelled";
   createdAt: Date;
   updatedAt: Date;
 }
 
+/* ---------------- Order Schema ---------------- */
 const orderSchema = new Schema<IOrder>(
   {
-    user: { type: String, required: true },
+    user: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
 
     items: [
       {
@@ -28,12 +42,24 @@ const orderSchema = new Schema<IOrder>(
           ref: "Product",
           required: true,
         },
-        quantity: { type: Number, required: true },
-        price: { type: Number, required: true },
+        quantity: {
+          type: Number,
+          required: true,
+          min: 1,
+        },
+        price: {
+          type: Number,
+          required: true,
+          min: 0,
+        },
       },
     ],
 
-    totalAmount: { type: Number, required: true },
+    totalAmount: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
 
     paymentMethod: {
       type: String,
@@ -41,7 +67,20 @@ const orderSchema = new Schema<IOrder>(
       required: true,
     },
 
-    shippingAddress: { type: String, required: true },
+    shippingAddress: {
+      address: {
+        type: String,
+        required: true,
+      },
+      country: {
+        type: String,
+        required: true,
+      },
+      phone: {
+        type: String,
+        required: true,
+      },
+    },
 
     status: {
       type: String,
@@ -49,7 +88,10 @@ const orderSchema = new Schema<IOrder>(
       default: "pending",
     },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
+/* ---------------- Export Model ---------------- */
 export const Order = mongoose.model<IOrder>("Order", orderSchema);
