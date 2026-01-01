@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FaBoxOpen, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import toast from "react-hot-toast";
 
 interface Product {
   _id: string;
@@ -70,26 +71,21 @@ const OrdersPage = () => {
       setSelectedOrder(null);
     } catch (err) {
       console.error(err);
-      alert("Failed to update status");
+      toast.error("Failed to load members.");
     }
   };
 
   if (loading)
     return (
-      <div className="text-center mt-10 text-xl text-gray-500">Loading...</div>
+      <div className="fixed inset-0 flex items-center justify-center z-50">
+        <div className="ml-[220px] w-14 h-14 border-4 border-purple-300 border-t-purple-600 rounded-full animate-spin"></div>
+      </div>
     );
 
   const indexOfLast = currentPage * ordersPerPage;
   const indexOfFirst = indexOfLast - ordersPerPage;
   const currentOrders = orders.slice(indexOfFirst, indexOfLast);
   const totalPages = Math.ceil(orders.length / ordersPerPage);
-
-  const nextPage = () => {
-    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
-  };
-  const prevPage = () => {
-    if (currentPage > 1) setCurrentPage(currentPage - 1);
-  };
 
   return (
     <div className="max-w-7xl mx-auto p-6">
@@ -116,7 +112,7 @@ const OrdersPage = () => {
             </div>
 
             <div className="flex justify-between items-center mb-3">
-              <h3 className="text-lg font-semibold text-indigo-500">
+              <h3 className="text-lg font-semibold text-purple-500">
                 Order #{order._id.slice(-6)}
               </h3>
               <span
@@ -153,30 +149,31 @@ const OrdersPage = () => {
 
       <div className="flex justify-center mt-8 gap-4">
         <button
-          onClick={prevPage}
+          onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
           disabled={currentPage === 1}
-          className="px-4 py-2 rounded-lg bg-gray-300 text-gray-700 hover:bg-gray-400 disabled:opacity-50"
+          className="px-5 py-2 rounded-xl font-medium bg-purple-100 text-purple-700 hover:bg-purple-200 disabled:bg-purple-50 disabled:text-purple-300 disabled:cursor-not-allowed shadow-sm"
         >
           Previous
         </button>
+
         <span className="px-3 py-2 text-gray-700 font-medium">
           Page {currentPage} of {totalPages}
         </span>
+
         <button
-          onClick={nextPage}
+          onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
           disabled={currentPage === totalPages}
-          className="px-4 py-2 rounded-lg bg-gray-300 text-gray-700 hover:bg-gray-400 disabled:opacity-50"
+          className="px-5 py-2 rounded-xl font-medium bg-purple-100 text-purple-700 hover:bg-purple-200 disabled:bg-purple-50 disabled:text-purple-300 disabled:cursor-not-allowed shadow-sm"
         >
           Next
         </button>
       </div>
 
-      {/* Modal */}
       {selectedOrder && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fadeIn">
           <div className="bg-white rounded-3xl w-full max-w-4xl p-6 overflow-auto max-h-[90vh] shadow-2xl relative border border-gray-200 transform transition-all scale-95 animate-scaleIn">
             <div className="flex justify-between items-center border-b pb-3 mb-6">
-              <h2 className="text-2xl font-extrabold text-gray-800">
+              <h2 className="text-2xl font-extrabold text-purple-500">
                 Order Details #{selectedOrder._id.slice(-6)}
               </h2>
               <button
@@ -234,11 +231,11 @@ const OrdersPage = () => {
               Items
             </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               {selectedOrder.items.map((item, idx) => (
                 <div
                   key={idx}
-                  className="bg-gray-50 rounded-2xl shadow hover:shadow-md p-4 flex items-center gap-4 transition transform hover:scale-[1.02]"
+                  className="bg-gray-200/80 rounded-2xl shadow hover:shadow-md p-4 flex items-center gap-4 transition transform hover:scale-[1.02]"
                 >
                   {item.product.images[0] ? (
                     <img

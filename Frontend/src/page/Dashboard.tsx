@@ -1,13 +1,16 @@
 import React, { useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import "react-toastify/dist/ReactToastify.css";
+import toast, { Toaster } from "react-hot-toast";
+
 import axios from "axios";
+import { jsPDF } from "jspdf";
 
 import {
   faMagnifyingGlass,
   faChartPie,
   faChevronDown,
-  faUserGear,
   faIdBadge,
   faArrowRightFromBracket,
   faChartSimple,
@@ -16,11 +19,73 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { faCalendar as faCalendarRegular } from "@fortawesome/free-regular-svg-icons";
 
+interface Admin {
+  name: string;
+  email: string;
+  profileImage: string;
+  _id: string;
+}
+
+interface OrderItem {
+  product: { name: string };
+  quantity: number;
+  price: number;
+}
+
+interface Order {
+  _id: string;
+  user: string;
+  totalAmount: number;
+  paymentMethod: string;
+  shippingAddress: string;
+  status: string;
+  createdAt: string;
+  items: OrderItem[];
+}
+
+interface EmailUser {
+  _id: string;
+  userName: string;
+  userEmail: string;
+  createdAt: string;
+  isBlocked: boolean;
+}
+
+interface GoogleUser {
+  id: string;
+  name: string;
+  email: string;
+  createdAt: string;
+  isBlocked: boolean;
+}
+
+interface Product {
+  _id: string;
+  name: string;
+  category: string;
+  price: number;
+  discountPrice?: number;
+  stock: number;
+  createdAt: string;
+}
+
+interface FormData {
+  name: string;
+  email: string;
+  profileImage: string;
+  profileImageFile: File | null;
+  userPassword: string;
+}
+
+interface jsPDFWithAutoTable extends jsPDF {
+  lastAutoTable?: { finalY: number };
+}
+
 const Dashboard = () => {
   const location = useLocation();
   const isActive = (path: string) => location.pathname === path;
 
-  const [admin, setAdmin] = React.useState<any>({
+  const [admin, setAdmin] = React.useState<Admin>({
     name: "",
     email: "",
     profileImage: "",
@@ -89,7 +154,7 @@ const Dashboard = () => {
     navigate("/login");
   };
 
-  const [formData, setFormData] = React.useState({
+  const [formData, setFormData] = React.useState<FormData>({
     name: "",
     email: "",
     profileImage: "",
@@ -132,14 +197,14 @@ const Dashboard = () => {
       const { jsPDF } = await import("jspdf");
       const autoTable = (await import("jspdf-autotable")).default;
 
-      const doc = new jsPDF();
+      const doc: jsPDFWithAutoTable = new jsPDF();
       let y = 20;
 
       doc.setFontSize(18);
       doc.text("FULL ORDERS REPORT", 14, y);
       y += 10;
 
-      orders.forEach((order: any, index: number) => {
+      orders.forEach((order: Order, index: number) => {
         doc.setFontSize(16);
         doc.text(`Order #${order._id.slice(-6)}`, 14, y);
         y += 8;
@@ -162,13 +227,13 @@ const Dashboard = () => {
           body: orderInfo,
         });
 
-        y = (doc as any).lastAutoTable.finalY + 10;
+        y = doc.lastAutoTable!.finalY + 10;
 
         doc.setFontSize(14);
         doc.text("Items:", 14, y);
         y += 5;
 
-        const itemRows = order.items.map((item: any) => [
+        const itemRows = order.items.map((item) => [
           item.product.name,
           item.quantity,
           `$${item.price}`,
@@ -180,7 +245,7 @@ const Dashboard = () => {
           body: itemRows,
         });
 
-        y = (doc as any).lastAutoTable.finalY + 10;
+        y = doc.lastAutoTable!.finalY + 10;
 
         if (index !== orders.length - 1) {
           doc.addPage();
@@ -212,7 +277,7 @@ const Dashboard = () => {
         }
       );
 
-      const emailUsers = emailRes.data.users.map((u: any) => ({
+      const emailUsers = emailRes.data.users.map((u: EmailUser) => ({
         id: u._id,
         name: u.userName,
         email: u.userEmail,
@@ -221,7 +286,7 @@ const Dashboard = () => {
         isBlocked: u.isBlocked,
       }));
 
-      const googleUsers = googleRes.data.users.map((u: any) => ({
+      const googleUsers = googleRes.data.users.map((u: GoogleUser) => ({
         id: u.id,
         name: u.name,
         email: u.email,
@@ -292,7 +357,7 @@ const Dashboard = () => {
       doc.setFontSize(18);
       doc.text("PRODUCTS REPORT", 14, 20);
 
-      const tableBody = products.map((p: any) => [
+      const tableBody = products.map((p: Product) => [
         p._id.slice(-6),
         p.name,
         p.category,
@@ -329,9 +394,15 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="bg-blue-100/40 min-h-screen flex">
-      <aside className="w-56 bg-white border-2 border-indigo-400 p-6 flex flex-col rounded-3xl m-4 mr-0 shrink-0 h-[615px] sticky top-3 shadow-xl">
-        <div className="flex items-center gap-2 mb-4 pb-3 border-b-2 border-indigo-200">
+    <div className="bg-gray-200/40 min-h-screen flex">
+      <Toaster />
+
+      <aside
+        className="fixed left-4 top-4 w-60 bg-white border-2 border-purple-400 p-5
+             flex flex-col rounded-2xl h-[calc(100vh-2rem)]
+             shadow-xl z-40"
+      >
+        <div className="flex items-center gap-3 mb-6 pb-4 border-b-2 border-purple-300/60">
           <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-md">
             <span className="text-white text-xs font-bold">JC</span>
           </div>
@@ -345,8 +416,8 @@ const Dashboard = () => {
             to="/dashboard"
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
               isActive("/dashboard")
-                ? "bg-indigo-500 text-white shadow"
-                : "text-gray-700 hover:bg-indigo-100 hover:text-indigo-700"
+                ? "bg-gradient-to-br from-purple-600 to-indigo-500 text-white shadow"
+                : "text-gray-700 hover:bg-purple-100 hover:text-purple-700"
             }`}
           >
             <svg
@@ -367,7 +438,7 @@ const Dashboard = () => {
             to="products"
             className={`flex items-center gap-3 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
               isActive("/dashboard/products")
-                ? "bg-purple-500 text-white shadow"
+                ? "bg-gradient-to-br from-purple-600 to-indigo-500 text-white shadow"
                 : "text-gray-700 hover:bg-purple-100 hover:text-purple-700"
             }`}
           >
@@ -391,8 +462,8 @@ const Dashboard = () => {
             to="orders"
             className={`flex items-center gap-3 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
               isActive("/dashboard/orders")
-                ? "bg-indigo-500 text-white shadow"
-                : "text-gray-700 hover:bg-indigo-100 hover:text-indigo-700"
+                ? "bg-gradient-to-br from-purple-600 to-indigo-500 text-white shadow"
+                : "text-gray-700 hover:bg-purple-100 hover:text-purple-700"
             }`}
           >
             <svg
@@ -411,31 +482,11 @@ const Dashboard = () => {
             Orders
           </Link>
 
-          <a
-            href="#"
-            className="flex items-center gap-3 px-4 py-2 rounded-xl text-sm text-gray-600 hover:bg-indigo-50 hover:text-indigo-700 transition-all duration-200"
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-              />
-            </svg>
-            Customization
-          </a>
-
           <Link
             to="support"
             className={`relative flex items-center gap-3 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
               isActive("/dashboard/support")
-                ? "bg-purple-500 text-white shadow"
+                ? "bg-gradient-to-br from-purple-600 to-indigo-500 text-white shadow"
                 : "text-gray-700 hover:bg-purple-100 hover:text-purple-700"
             }`}
             onClick={() => setNewContactCount(0)}
@@ -465,8 +516,8 @@ const Dashboard = () => {
             to="members"
             className={`flex items-center gap-3 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
               isActive("/dashboard/members")
-                ? "bg-indigo-500 text-white shadow"
-                : "text-gray-700 hover:bg-indigo-100 hover:text-indigo-700"
+                ? "bg-gradient-to-br from-purple-600 to-indigo-500 text-white shadow"
+                : "text-gray-700 hover:bg-purple-100 hover:text-purple-700"
             }`}
           >
             <svg
@@ -486,23 +537,23 @@ const Dashboard = () => {
           </Link>
         </nav>
 
-        <div className="mb-3 flex flex-col items-center gap-2 border-t-2 border-indigo-200 pt-4">
+        <div className="mb-3 flex flex-col items-center gap-2 border-t-2 border-purple-300 pt-4">
           <img
             src={
               admin.profileImage ||
               "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR233AdxQNGX7tQYvWj2gvoa92YNOU8y3zDzw&s"
             }
             alt="Admin Profile"
-            className="w-16 h-16 rounded-full object-cover border-2 border-indigo-300 shadow-md"
+            className="w-16 h-16 rounded-full object-cover border-2 border-gray-400 shadow-md"
           />
           <div className="text-center">
-            <p className="text-md font-medium text-indigo-700">{admin.name}</p>
-            <p className="text-sm text-indigo-400">{admin.email}</p>
+            <p className="text-md font-medium text-purple-700">{admin.name}</p>
+            <p className="text-sm text-gray-500">{admin.email}</p>
           </div>
         </div>
       </aside>
 
-      <main className="flex-1 p-6 space-y-4 overflow-auto">
+      <main className="flex-1 ml-[17rem] p-6 space-y-4 overflow-auto">
         <div className="flex items-center gap-6 max-w-7xl mx-auto px-4 py-3">
           <div className="w-[520px] bg-white rounded-full px-5 py-3 flex items-center gap-3 border border-gray-300 focus-within:ring-2 focus-within:ring-indigo-500 transition-all duration-300 shadow-md hover:shadow-lg">
             <FontAwesomeIcon
@@ -523,12 +574,16 @@ const Dashboard = () => {
                 className="text-gray-400 text-sm"
               />
               <span className="text-gray-700 font-semibold text-xs tracking-wider uppercase">
-                Nov 22, 2025
+                {new Date().toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "2-digit",
+                  year: "numeric",
+                })}
               </span>
             </div>
 
             <div className="relative group">
-              <button className="flex items-center px-5 py-3 rounded-full text-sm font-semibold bg-gradient-to-br from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+              <button className="flex items-center px-5 py-3 rounded-full text-sm font-semibold bg-gradient-to-br from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-300 transform ">
                 <FontAwesomeIcon icon={faChartPie} className="mr-2" />
                 Reports
                 <FontAwesomeIcon
@@ -537,11 +592,11 @@ const Dashboard = () => {
                 />
               </button>
 
-              <div className="absolute right-0 mt-2 w-52 z-50 bg-white/80 backdrop-blur-md border border-gray-200/30 rounded-2xl shadow-2xl ring-1 ring-black/10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 origin-top-right transform scale-90 group-hover:scale-100">
+              <div className="absolute right-0 mt-2 w-52 z-50 bg-white/80 backdrop-blur-md border border-gray-200/30 rounded-2xl shadow-2xl ring-1 ring-black/10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 origin-top-right transform scale-90 ">
                 <a
                   href="#"
                   onClick={generateMembersReport}
-                  className="flex items-center gap-2 px-4 py-3 text-sm font-medium text-gray-700 bg-white/60 backdrop-blur-sm rounded-t-xl shadow-sm hover:bg-gradient-to-r hover:from-purple-50 hover:to-indigo-50 hover:text-gray-900 transition-all duration-300 hover:scale-105"
+                  className="flex items-center gap-2 px-4 py-3 text-sm font-medium text-gray-700 bg-white/60 backdrop-blur-sm rounded-t-xl shadow-sm hover:bg-gradient-to-r hover:from-purple-50 hover:to-indigo-50 hover:text-gray-900 transition-all duration-300 "
                 >
                   <FontAwesomeIcon
                     icon={faChartSimple}
@@ -553,7 +608,7 @@ const Dashboard = () => {
                 <a
                   href="#"
                   onClick={generateOrdersReport}
-                  className="flex items-center gap-2 px-4 py-3 text-sm font-medium text-gray-700 bg-white/60 backdrop-blur-sm shadow-sm hover:bg-gradient-to-r hover:from-green-50 hover:to-teal-50 hover:text-gray-900 transition-all duration-300 hover:scale-105"
+                  className="flex items-center gap-2 px-4 py-3 text-sm font-medium text-gray-700 bg-white/60 backdrop-blur-sm shadow-sm hover:bg-gradient-to-r hover:from-green-50 hover:to-teal-50 hover:text-gray-900 transition-all duration-300 "
                 >
                   <FontAwesomeIcon
                     icon={faChartLine}
@@ -565,38 +620,52 @@ const Dashboard = () => {
                 <a
                   href="#"
                   onClick={generateProductsReport}
-                  className="flex items-center gap-2 px-4 py-3 text-sm font-medium text-gray-700 bg-white/60 backdrop-blur-sm rounded-b-xl shadow-sm hover:bg-gradient-to-r hover:from-yellow-50 hover:to-orange-50 hover:text-gray-900 transition-all duration-300 hover:scale-105"
+                  className="flex items-center gap-2 px-4 py-3 text-sm font-medium text-gray-700 bg-white/60 backdrop-blur-sm rounded-b-xl shadow-sm hover:bg-gradient-to-r hover:from-yellow-50 hover:to-orange-50 hover:text-gray-900 transition-all duration-300 "
                 >
                   <FontAwesomeIcon icon={faStar} className="text-yellow-500" />
                   Product Report
                 </a>
               </div>
             </div>
-
             <div className="relative group">
-              <button className="w-12 h-12 flex items-center justify-center rounded-full bg-white border border-gray-300 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-105 overflow-hidden relative">
+              <button
+                className="relative w-11 h-11 rounded-full bg-white border border-gray-400
+               shadow hover:shadow-md transition-all duration-200
+               focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
                 <img
                   src={
                     admin.profileImage ||
                     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjlvNBPzsciij8KcvV9tR2rHw_5p8Ymb796A&s"
                   }
                   alt="Profile"
-                  className="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
+                  className="w-full h-full rounded-full object-cover"
                 />
-                <span className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white shadow-sm"></span>
+
+                <span
+                  className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500
+                     rounded-full border-2 border-white"
+                ></span>
               </button>
 
-              <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 origin-top-right transform scale-95 group-hover:scale-100 z-50">
-                <div className="p-4 flex items-center gap-4 border-b border-gray-100 rounded-t-2xl">
+              <div
+                className="absolute right-0 mt-3 w-60 bg-white border border-gray-200
+               rounded-xl shadow-lg
+               opacity-0 invisible group-hover:opacity-100 group-hover:visible
+               translate-y-1 group-hover:translate-y-0
+               transition-all duration-200 z-50"
+              >
+                <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100">
                   <img
                     src={
                       admin.profileImage ||
                       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjlvNBPzsciij8KcvV9tR2rHw_5p8Ymb796A&s"
                     }
                     alt="Profile"
-                    className="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
+                    className="w-10 h-10 rounded-full object-cover border border-gray-500"
                   />
-                  <div className="flex-1 min-w-0">
+
+                  <div className="min-w-0">
                     <p className="text-sm font-semibold text-gray-900 truncate">
                       {admin.name || "Admin User"}
                     </p>
@@ -606,7 +675,7 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-                <div className="p-3 space-y-2">
+                <div className="py-2">
                   <button
                     onClick={(e) => {
                       e.preventDefault();
@@ -619,27 +688,31 @@ const Dashboard = () => {
                       });
                       setIsModalOpen(true);
                     }}
-                    className="w-full flex items-center gap-3 px-3 py-3 text-sm font-medium text-gray-700 hover:bg-indigo-50 rounded-lg transition-all duration-200"
+                    className="w-full flex items-center gap-3 px-4 py-2.5
+                   text-sm text-gray-700 hover:bg-indigo-50 transition"
                   >
-                    <div className="w-9 h-9 flex items-center justify-center rounded-lg border-b border-gray-300 bg-indigo-100 text-indigo-700">
-                      <FontAwesomeIcon icon={faIdBadge} />
-                    </div>
+                    <FontAwesomeIcon
+                      icon={faIdBadge}
+                      className="text-indigo-600"
+                    />
                     Manage Account
                   </button>
 
                   <button
                     onClick={handleLogout}
-                    className="w-full flex items-center gap-3 px-3 py-3 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
+                    className="w-full flex items-center gap-3 px-4 py-2.5
+                   text-sm text-red-600 hover:bg-red-50 transition"
                   >
-                    <div className="w-9 h-9 flex items-center justify-center rounded-lg bg-red-100 text-red-500">
-                      <FontAwesomeIcon icon={faArrowRightFromBracket} />
-                    </div>
+                    <FontAwesomeIcon
+                      icon={faArrowRightFromBracket}
+                      className="text-red-500"
+                    />
                     Logout
                   </button>
                 </div>
 
-                <div className="px-4 py-3 border-t border-gray-100 text-center text-xs text-gray-400 rounded-b-2xl">
-                  Last login: {new Date().toLocaleDateString()}
+                <div className="px-4 py-2 text-[11px] text-gray-400 border-t border-gray-100">
+                  Last login · {new Date().toLocaleDateString()}
                 </div>
               </div>
             </div>
@@ -734,7 +807,16 @@ const Dashboard = () => {
                 onClick={async () => {
                   try {
                     const token = localStorage.getItem("token");
-                    if (!token) return alert("You must be logged in");
+                    if (!token)
+                      return toast.success("You must be logged in", {
+                        style: {
+                          marginTop: "45px",
+                          marginLeft: "220px",
+                          borderRadius: "12px",
+                          background: "#111827",
+                          color: "#fff",
+                        },
+                      });
 
                     const formDataObj = new FormData();
                     formDataObj.append("userName", formData.name);
@@ -769,10 +851,18 @@ const Dashboard = () => {
                       _id: res.data.user._id,
                     });
                     setIsModalOpen(false);
-                    alert("Profile updated successfully!");
+                    toast.success("Profile updated successfully", {
+                      style: {
+                        marginTop: "45px",
+                        marginLeft: "220px",
+                        borderRadius: "12px",
+                        background: "#111827",
+                        color: "#fff",
+                      },
+                    });
                   } catch (err) {
                     console.error(err);
-                    alert("Failed to update profile");
+                    toast.error("Failed to save product");
                   }
                 }}
               >
@@ -782,6 +872,28 @@ const Dashboard = () => {
           </div>
         </div>
       )}
+
+      <style>{`
+::-webkit-scrollbar {
+  width: 14px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #8952b3;
+  border-radius: 10px;
+  border: 3px solid #f0f0f0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #654c78;
+}
+`}</style>
     </div>
   );
 };

@@ -9,6 +9,8 @@ import {
   CartesianGrid,
   Tooltip,
 } from "recharts";
+import { faHeadset } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface Product {
   _id: string;
@@ -33,6 +35,14 @@ interface Order {
   shippingAddress: string;
 }
 
+interface Contact {
+  _id: string;
+  name: string;
+  email: string;
+  message: string;
+  createdAt: string;
+}
+
 const DashboardHome = () => {
   const [latestOrders, setLatestOrders] = useState<Order[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -42,7 +52,7 @@ const DashboardHome = () => {
   const [chartData, setChartData] = useState<
     { day: string; InProgress: number; Completed: number }[]
   >([]);
-  const [contacts, setContacts] = useState([]);
+  const [contacts, setContacts] = useState<Contact[]>([]);
   const [visibleIndex, setVisibleIndex] = useState(0);
 
   const fetchLatestOrders = async () => {
@@ -153,20 +163,24 @@ const DashboardHome = () => {
     visibleContacts.push(...contacts.slice(0, 2 - visibleContacts.length));
   }
 
+  type TabType = "all" | "completed" | "in-progress" | "pending";
+
+  const tabs: { label: string; value: TabType }[] = [
+    { label: "All Tasks", value: "all" },
+    { label: "Completed", value: "completed" },
+    { label: "In Progress", value: "in-progress" },
+    { label: "Pending", value: "pending" },
+  ];
+
   return (
     <>
       <div className="bg-white rounded-3xl p-8 shadow-2xl border border-gray-200">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-6">
           <div className="flex gap-6 overflow-x-auto">
-            {[
-              { label: "All Tasks", value: "all" },
-              { label: "Completed", value: "completed" },
-              { label: "In Progress", value: "in-progress" },
-              { label: "Pending", value: "pending" },
-            ].map((tab) => (
+            {tabs.map((tab) => (
               <button
                 key={tab.value}
-                onClick={() => setActiveTab(tab.value as any)}
+                onClick={() => setActiveTab(tab.value)}
                 className={`pb-2 font-semibold text-lg transition-all ${
                   activeTab === tab.value
                     ? "text-indigo-600 border-b-2 border-indigo-600"
@@ -269,126 +283,176 @@ const DashboardHome = () => {
       </div>
 
       <div className="grid grid-cols-12 gap-6 mt-6">
-        <div className="col-span-8 bg-white rounded-3xl p-6 shadow-lg border border-gray-100">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">Order Progress</h2>
-            <div className="flex items-center gap-4">
+        <div className="col-span-8 bg-white rounded-3xl p-8 shadow-xl border border-gray-200">
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">
+                Order Progress
+              </h2>
+              <p className="text-sm text-gray-500 mt-1">
+                Daily order activity overview
+              </p>
+            </div>
+
+            <div className="flex items-center gap-5">
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2 text-sm font-medium text-gray-600">
-                  <span className="w-3 h-3 rounded-full bg-cyan-400"></span>In
-                  Progress
+                  <span className="w-3 h-3 rounded-full bg-cyan-400" />
+                  In Progress
                 </div>
                 <div className="flex items-center gap-2 text-sm font-medium text-gray-600">
-                  <span className="w-3 h-3 rounded-full bg-slate-800"></span>
+                  <span className="w-3 h-3 rounded-full bg-slate-800" />
                   Completed
                 </div>
               </div>
-              <div className="bg-gray-100 text-gray-700 rounded-lg px-4 py-1 text-sm font-medium cursor-pointer hover:bg-gray-200 transition-colors">
+
+              <div className="bg-gray-100 text-gray-700 rounded-xl px-4 py-1.5 text-sm font-medium cursor-pointer hover:bg-gray-200 transition">
                 {dateRange}
               </div>
             </div>
           </div>
 
-          <div className="w-full h-64">
+          <div className="w-full h-72">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
                 data={chartData}
-                margin={{ top: 10, right: 20, left: 0, bottom: 10 }}
+                margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
               >
                 <defs>
                   <linearGradient
-                    id="colorInProgress"
+                    id="inProgressGlow"
                     x1="0"
                     y1="0"
                     x2="0"
                     y2="1"
                   >
-                    <stop offset="0%" stopColor="#22d3ee" stopOpacity={0.4} />
+                    <stop offset="0%" stopColor="#22d3ee" stopOpacity={0.35} />
                     <stop offset="100%" stopColor="#22d3ee" stopOpacity={0} />
                   </linearGradient>
+
                   <linearGradient
-                    id="colorCompleted"
+                    id="completedGlow"
                     x1="0"
                     y1="0"
                     x2="0"
                     y2="1"
                   >
-                    <stop offset="0%" stopColor="#1e293b" stopOpacity={0.4} />
-                    <stop offset="100%" stopColor="#1e293b" stopOpacity={0} />
+                    <stop offset="0%" stopColor="#0f172a" stopOpacity={0.35} />
+                    <stop offset="100%" stopColor="#0f172a" stopOpacity={0} />
                   </linearGradient>
                 </defs>
 
                 <CartesianGrid
-                  strokeDasharray="3 3"
+                  strokeDasharray="4 4"
                   stroke="#e5e7eb"
                   vertical={false}
                 />
-                <XAxis dataKey="day" tick={{ fontSize: 12, fill: "#6b7280" }} />
+
+                <XAxis
+                  dataKey="day"
+                  tick={{ fontSize: 12, fill: "#6b7280" }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+
                 <YAxis
-                  domain={[0, "dataMax + 1"]}
                   allowDecimals={false}
                   tick={{ fontSize: 12, fill: "#6b7280" }}
+                  axisLine={false}
+                  tickLine={false}
                 />
+
                 <Tooltip
+                  cursor={{ stroke: "#e5e7eb", strokeWidth: 1 }}
                   contentStyle={{
-                    backgroundColor: "#f9fafb",
-                    border: "1px solid #d1d5db",
-                    borderRadius: "8px",
-                    padding: "10px",
+                    backgroundColor: "#ffffff",
+                    borderRadius: "14px",
+                    border: "1px solid #e5e7eb",
+                    boxShadow: "0 10px 25px rgba(0,0,0,0.08)",
+                    padding: "12px",
                   }}
-                  labelStyle={{ fontWeight: "bold", color: "#111827" }}
-                  itemStyle={{ color: "#111827", fontWeight: 500 }}
+                  labelStyle={{
+                    fontWeight: 600,
+                    color: "#111827",
+                    marginBottom: "4px",
+                  }}
+                  itemStyle={{
+                    fontWeight: 500,
+                    color: "#374151",
+                  }}
                 />
+
                 <Line
-                  type="monotone"
+                  type="natural"
                   dataKey="InProgress"
                   stroke="#22d3ee"
                   strokeWidth={3}
-                  dot={{ r: 4, fill: "#22d3ee", stroke: "white" }}
-                  activeDot={{ r: 6, fill: "#22d3ee", stroke: "white" }}
-                  fill="url(#colorInProgress)"
-                  fillOpacity={1}
+                  dot={false}
+                  activeDot={{
+                    r: 6,
+                    fill: "#22d3ee",
+                    stroke: "white",
+                    strokeWidth: 2,
+                  }}
+                  fill="url(#inProgressGlow)"
                 />
+
                 <Line
-                  type="monotone"
+                  type="natural"
                   dataKey="Completed"
-                  stroke="#1e293b"
+                  stroke="#0f172a"
                   strokeWidth={3}
-                  dot={{ r: 4, fill: "#1e293b", stroke: "white" }}
-                  activeDot={{ r: 6, fill: "#1e293b", stroke: "white" }}
-                  fill="url(#colorCompleted)"
-                  fillOpacity={1}
+                  dot={false}
+                  activeDot={{
+                    r: 6,
+                    fill: "#0f172a",
+                    stroke: "white",
+                    strokeWidth: 2,
+                  }}
+                  fill="url(#completedGlow)"
                 />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        <div className="col-span-4 bg-gradient-to-b from-slate-700 to-slate-900 rounded-2xl p-4 shadow-lg">
-          <h2 className="text-lg font-bold text-white mb-3 text-center">
-            Contact Support
+        <div className="col-span-4 bg-gradient-to-br from-slate-800 via-slate-900 to-black rounded-3xl p-6 shadow-2xl border border-slate-700">
+          <h2 className="flex items-center justify-center gap-1 text-xl font-bold text-white mb-5 tracking-wide">
+            <FontAwesomeIcon
+              icon={faHeadset}
+              className="text-purple-400 text-xl"
+            />
+            <span>Contact Support</span>
           </h2>
-          <div className="grid grid-cols-1 gap-3">
+
+          <div className="grid grid-cols-1 gap-4">
             {visibleContacts.map((c) => (
               <div
                 key={c._id}
-                className="group bg-white rounded-xl shadow-md p-4 relative overflow-hidden border border-gray-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col items-center justify-center"
+                className="group relative bg-white/95 backdrop-blur rounded-2xl p-5 border border-gray-200 shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 overflow-hidden"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-indigo-100/30 to-purple-100/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
-                <div className="relative z-10 flex flex-col items-center text-center gap-1">
-                  <h3 className="font-semibold text-lg text-indigo-700 transition-colors">
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-200/40 to-purple-200/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                <div className="relative z-10 flex flex-col gap-1 text-center">
+                  <h3 className="text-lg font-semibold text-indigo-700">
                     {c.name}
                   </h3>
-                  <p className="text-gray-500 text-xs">{c.email}</p>
-                  <p className="text-gray-600 text-md mt-1">
-                    <span className="font-medium text-gray-700">Message: </span>
+
+                  <p className="text-xs text-gray-500">{c.email}</p>
+
+                  <div className=" rounded-xl p-3 text-sm text-gray-700">
+                    <span className="font-semibold text-gray-800">
+                      Message:
+                    </span>{" "}
                     {c.message}
-                  </p>
-                  <p className="text-gray-400 text-[10px] mt-1">
+                  </div>
+
+                  <p className="text-[11px] text-gray-400 mt-2">
                     {new Date(c.createdAt).toLocaleString()}
                   </p>
                 </div>
-                <div className="absolute top-0 right-0 h-full w-1.5 bg-indigo-500 rounded-r-xl group-hover:w-2 transition-all duration-300"></div>
+
+                <div className="absolute top-0 right-0 h-full w-1 bg-indigo-500 group-hover:w-2 transition-all duration-300 rounded-r-2xl"></div>
               </div>
             ))}
           </div>
@@ -404,7 +468,7 @@ const DashboardHome = () => {
             >
               &times;
             </button>
-            <h2 className="text-3xl font-bold mb-6 text-gray-800 border-b pb-3">
+            <h2 className="text-3xl font-bold mb-6 text-purple-500 border-b pb-3">
               Order Details #{selectedOrder._id.slice(-6)}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-gray-700 text-sm">

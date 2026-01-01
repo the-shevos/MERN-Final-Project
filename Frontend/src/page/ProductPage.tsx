@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FaTrash, FaEdit, FaPlus } from "react-icons/fa";
+import toast, { Toaster } from "react-hot-toast";
 
 interface Product {
   _id: string;
@@ -14,6 +15,17 @@ interface Product {
   createdAt: string;
 }
 
+interface FormDataType {
+  name: string;
+  description: string;
+  category: string;
+  price: string | number;
+  discountPrice: string | number;
+  stock: string | number;
+  images: File[];
+  imagePreviews: string[];
+}
+
 type FilterType = "all" | "discounted" | "inStock" | "outOfStock";
 
 const ProductPage = () => {
@@ -23,15 +35,16 @@ const ProductPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
-  const [formData, setFormData] = useState<any>({
+
+  const [formData, setFormData] = useState<FormDataType>({
     name: "",
     description: "",
     category: "",
     price: "",
     discountPrice: "",
     stock: "",
-    images: [] as File[],
-    imagePreviews: [] as string[],
+    images: [],
+    imagePreviews: [],
   });
 
   const productsPerPage = 8;
@@ -72,17 +85,76 @@ const ProductPage = () => {
     currentPage < totalPages && setCurrentPage(currentPage + 1);
   const prevPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm("Are you sure?")) return;
-    try {
-      await axios.delete(`http://localhost:3000/api/v1/products/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      fetchProducts();
-    } catch (err) {
-      console.error(err);
-      alert("Failed to delete product");
-    }
+  const confirmDeleteProduct = (product: Product) => {
+    toast.custom(
+      (t) => (
+        <div
+          className={`fixed inset-0 z-50 flex items-start justify-start pt-10 pl-[560px] transition-all duration-500 ${
+            t.visible ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          <div className="bg-white rounded-2xl shadow-2xl p-6 w-[340px] text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-100">
+              <FaTrash className="text-red-600 text-2xl" />
+            </div>
+
+            <h3 className="text-lg font-semibold text-gray-800">
+              Delete Product
+            </h3>
+
+            <p className="text-sm text-gray-500 mt-2">
+              Are you sure you want to delete
+              <br />
+              <span className="font-semibold text-gray-700">
+                {product.name}
+              </span>
+              ?
+            </p>
+
+            <div className="flex justify-center gap-3 mt-6">
+              <button
+                onClick={() => toast.dismiss(t.id)}
+                className="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={async () => {
+                  toast.dismiss(t.id);
+                  try {
+                    await axios.delete(
+                      `http://localhost:3000/api/v1/products/${product._id}`,
+                      { headers: { Authorization: `Bearer ${token}` } }
+                    );
+
+                    fetchProducts();
+
+                    setTimeout(() => {
+                      toast.success("Product deleted successfully", {
+                        style: {
+                          marginTop: "45px",
+                          marginLeft: "220px",
+                          borderRadius: "12px",
+                          background: "#111827",
+                          color: "#fff",
+                        },
+                      });
+                    }, 800);
+                  } catch {
+                    toast.error("Failed to delete product");
+                  }
+                }}
+                className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      ),
+      { duration: 8000 }
+    );
   };
 
   const handleChange = (
@@ -118,17 +190,15 @@ const ProductPage = () => {
   };
 
   const handleSubmit = async () => {
-    if (!formData.name || !formData.price || !formData.stock) {
-      alert("Name, Price, and Stock are required");
-      return;
-    }
-
     const data = new FormData();
+
     Object.keys(formData).forEach((key) => {
-      if (key === "images") {
-        formData.images.forEach((file: File) => data.append("images", file));
+      const value = formData[key as keyof FormDataType];
+
+      if (key === "images" && Array.isArray(value)) {
+        (value as File[]).forEach((file) => data.append("images", file));
       } else if (key !== "imagePreviews") {
-        data.append(key, formData[key]);
+        data.append(key, String(value));
       }
     });
 
@@ -139,18 +209,34 @@ const ProductPage = () => {
           data,
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        alert("Product updated");
+        toast.success("Product updated successfully", {
+          style: {
+            marginTop: "45px",
+            marginLeft: "220px",
+            borderRadius: "12px",
+            background: "#111827",
+            color: "#fff",
+          },
+        });
       } else {
         await axios.post("http://localhost:3000/api/v1/products", data, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        alert("Product added");
+        toast.success("Product added successfully", {
+          style: {
+            marginTop: "45px",
+            marginLeft: "220px",
+            borderRadius: "12px",
+            background: "#111827",
+            color: "#fff",
+          },
+        });
       }
       fetchProducts();
       resetForm();
     } catch (err) {
       console.error(err);
-      alert("Failed to save product");
+      toast.error("Failed to save product");
     }
   };
 
@@ -171,11 +257,15 @@ const ProductPage = () => {
 
   if (loading)
     return (
-      <div className="text-center mt-10 text-xl text-gray-500">Loading...</div>
+      <div className="fixed inset-0 flex items-center justify-center z-50">
+        <div className="ml-[220px] w-14 h-14 border-4 border-purple-300 border-t-purple-600 rounded-full animate-spin"></div>
+      </div>
     );
 
   return (
     <div className="max-w-7xl mx-auto p-6">
+      <Toaster />
+
       <h1 className="text-3xl font-bold text-purple-700 text-center mb-8">
         My Products
       </h1>
@@ -192,8 +282,8 @@ const ProductPage = () => {
                 }}
                 className={`px-5 py-2 rounded-full cursor-pointer font-medium transition-all duration-200 ${
                   filter === f
-                    ? "bg-gradient-to-r from-purple-600 to-purple-400 text-white shadow-lg"
-                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                    ? "bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg"
+                    : "bg-gray-300/70 text-gray-700 hover:bg-gray-300"
                 }`}
               >
                 {f === "all"
@@ -278,8 +368,8 @@ const ProductPage = () => {
                 <FaEdit />
               </button>
               <button
-                onClick={() => handleDelete(p._id)}
-                className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-full transition"
+                onClick={() => confirmDeleteProduct(p)}
+                className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-full"
               >
                 <FaTrash />
               </button>
@@ -292,7 +382,7 @@ const ProductPage = () => {
         <button
           onClick={prevPage}
           disabled={currentPage === 1}
-          className="px-4 py-2 rounded-lg bg-gray-300 text-gray-700 hover:bg-gray-400 disabled:opacity-50"
+          className="px-5 py-2 rounded-xl font-medium bg-purple-100 text-purple-700 hover:bg-purple-200 disabled:bg-purple-50 disabled:text-purple-300 disabled:cursor-not-allowed shadow-sm"
         >
           Previous
         </button>
@@ -302,7 +392,7 @@ const ProductPage = () => {
         <button
           onClick={nextPage}
           disabled={currentPage === totalPages}
-          className="px-4 py-2 rounded-lg bg-gray-300 text-gray-700 hover:bg-gray-400 disabled:opacity-50"
+          className="px-5 py-2 rounded-xl font-medium bg-purple-100 text-purple-700 hover:bg-purple-200 disabled:bg-purple-50 disabled:text-purple-300 disabled:cursor-not-allowed shadow-sm"
         >
           Next
         </button>
@@ -327,6 +417,7 @@ const ProductPage = () => {
                 <input
                   type="text"
                   name="name"
+                  required
                   placeholder="Product Name"
                   value={formData.name}
                   onChange={handleChange}
@@ -335,6 +426,7 @@ const ProductPage = () => {
                 <input
                   type="text"
                   name="category"
+                  required
                   placeholder="Category"
                   value={formData.category}
                   onChange={handleChange}
@@ -346,6 +438,7 @@ const ProductPage = () => {
                 <input
                   type="number"
                   name="price"
+                  required
                   placeholder="Price"
                   value={formData.price}
                   onChange={handleChange}
@@ -354,6 +447,7 @@ const ProductPage = () => {
                 <input
                   type="number"
                   name="discountPrice"
+                  required
                   placeholder="Discount Price"
                   value={formData.discountPrice}
                   onChange={handleChange}
@@ -365,6 +459,7 @@ const ProductPage = () => {
                 <input
                   type="number"
                   name="stock"
+                  required
                   placeholder="Stock"
                   value={formData.stock}
                   onChange={handleChange}
@@ -372,6 +467,7 @@ const ProductPage = () => {
                 />
                 <input
                   type="file"
+                  required
                   multiple
                   onChange={(e) => handleFileChange(e.target.files!)}
                   className="p-3 rounded-lg w-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 transition cursor-pointer"
@@ -380,6 +476,7 @@ const ProductPage = () => {
 
               <textarea
                 name="description"
+                required
                 placeholder="Description"
                 value={formData.description}
                 onChange={handleChange}
@@ -387,15 +484,17 @@ const ProductPage = () => {
               />
 
               {formData.imagePreviews.length > 0 && (
-                <div className="grid grid-cols-2 gap-2 mt-3">
-                  {formData.imagePreviews.map((img: string, idx: number) => (
-                    <img
-                      key={idx}
-                      src={img}
-                      alt={`preview-${idx}`}
-                      className="w-full h-28 object-cover rounded-lg shadow-md"
-                    />
-                  ))}
+                <div className="flex justify-center  mt-3">
+                  <div className="grid grid-cols-1 gap-3">
+                    {formData.imagePreviews.map((img: string, idx: number) => (
+                      <img
+                        key={idx}
+                        src={img}
+                        alt={`preview-${idx}`}
+                        className="w-40 h-32 border border-gray-500 object-cover rounded-xl shadow-md"
+                      />
+                    ))}
+                  </div>
                 </div>
               )}
 

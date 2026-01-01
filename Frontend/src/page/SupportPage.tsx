@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import toast, { Toaster } from "react-hot-toast";
 
 interface ContactCard {
   _id: string;
@@ -24,8 +25,8 @@ const Support = () => {
           "http://localhost:3000/api/v1/contact"
         );
         setCardsData(response.data);
-      } catch (error) {
-        console.error("Error fetching contact requests:", error);
+      } catch {
+        toast.error("Failed to load contact requests");
       } finally {
         setLoading(false);
       }
@@ -33,28 +34,38 @@ const Support = () => {
     fetchData();
   }, []);
 
-  if (loading) {
+  if (loading)
     return (
-      <div className="text-center text-white mt-10 text-xl">
-        Loading contact requests...
+      <div className="fixed inset-0 flex items-center justify-center z-50">
+        <div className="ml-[220px] w-14 h-14 border-4 border-purple-300 border-t-purple-600 rounded-full animate-spin"></div>
       </div>
     );
-  }
 
   const handleSendReply = async (card: ContactCard) => {
     if (!replyMessage.trim()) return;
+
     try {
       await axios.post(
         `http://localhost:3000/api/v1/contact/reply/${card._id}`,
         { message: replyMessage }
       );
+
       setCardsData((prev) => prev.filter((c) => c._id !== card._id));
-      alert(`Reply sent to ${card.name}`);
       setReplyMessage("");
       setReplyingToId(null);
-    } catch (err) {
-      console.error("Error sending reply:", err);
-      alert("Failed to send reply");
+
+      toast.success(`Reply sent to ${card.name}`, {
+        icon: "✅",
+        style: {
+          marginTop: "45px",
+          marginLeft: "220px",
+          borderRadius: "12px",
+          background: "#111827",
+          color: "#fff",
+        },
+      });
+    } catch {
+      toast.error("Failed to send reply");
     }
   };
 
@@ -63,41 +74,37 @@ const Support = () => {
   const currentCards = cardsData.slice(indexOfFirstCard, indexOfLastCard);
   const totalPages = Math.ceil(cardsData.length / cardsPerPage);
 
-  const nextPage = () => {
-    if (currentPage < totalPages) setCurrentPage((p) => p + 1);
-  };
-
-  const prevPage = () => {
-    if (currentPage > 1) setCurrentPage((p) => p - 1);
-  };
-
   return (
-    <div className="max-w-7xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-8 text-center text-purple-700">
+    <div className="max-w-7xl mx-auto p-6 relative">
+      <Toaster />
+
+      <h1 className="text-4xl font-bold mb-10 text-center text-purple-700 drop-shadow-md">
         Contact Support Requests
       </h1>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 justify-items-center">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10 justify-items-center">
         {currentCards.map((card) => (
           <div
             key={card._id}
-            className="bg-white rounded-3xl border border-gray-300 shadow-md hover:shadow-xl transition-shadow w-80 flex flex-col text-center"
+            className="bg-white rounded-3xl border border-purple-200 shadow-lg hover:shadow-2xl transition-all w-80 flex flex-col text-center transform hover:-translate-y-1"
           >
             <div className="p-8 flex flex-col flex-grow">
-              <h2 className="text-3xl font-semibold text-purple-600 mb-2">
+              <h2 className="text-2xl font-semibold text-purple-700 mb-2">
                 {card.name}
               </h2>
 
-              <p className="text-gray-600 text-base mb-2">{card.email}</p>
-              <p className="text-gray-700 text-base mb-4">{card.message}</p>
+              <p className="text-gray-600 text-sm mb-2">{card.email}</p>
+              <p className="text-purple-800 font-medium text-base mb-4">
+                {card.message}
+              </p>
 
-              <p className="text-gray-400 text-sm mb-4">
+              <p className="text-gray-400 text-xs mb-4">
                 Submitted: {new Date(card.createdAt).toLocaleString()}
               </p>
 
               {replyingToId !== card._id && (
                 <button
-                  className="px-5 py-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition-colors shadow-md hover:shadow-lg"
+                  className="px-5 py-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition-colors shadow-md hover:shadow-lg font-semibold"
                   onClick={() => setReplyingToId(card._id)}
                 >
                   Reply
@@ -108,13 +115,13 @@ const Support = () => {
             <div
               className={`overflow-hidden transition-all duration-500 ease-in-out w-full ${
                 replyingToId === card._id
-                  ? "max-h-[500px] opacity-100 mt-0"
-                  : "max-h-0 opacity-0 mt-0"
+                  ? "max-h-[500px] opacity-100"
+                  : "max-h-0 opacity-0"
               }`}
             >
-              <div className="p-4 flex flex-col gap-3">
+              <div className="p-5 flex flex-col gap-3 bg-purple-50 rounded-b-3xl">
                 <textarea
-                  className="w-full border border-gray-300 rounded-2xl p-3 text-gray-800 resize-none shadow-sm focus:outline-none focus:border-2 focus:border-purple-500 text-base transition-all"
+                  className="w-full border border-purple-200 rounded-2xl p-3 text-gray-800 resize-none shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 text-base transition-all"
                   placeholder="Type your reply here..."
                   value={replyMessage}
                   onChange={(e) => setReplyMessage(e.target.value)}
@@ -123,7 +130,7 @@ const Support = () => {
 
                 <div className="flex justify-end gap-3">
                   <button
-                    className="px-5 py-2 w-24 bg-red-300/60 text-red-700 rounded-2xl hover:bg-red-300 transition-colors shadow-sm hover:shadow-md"
+                    className="px-5 py-2 w-24 bg-red-200 text-red-700 rounded-2xl hover:bg-red-300 transition-colors shadow-sm hover:shadow-md font-medium"
                     onClick={() => {
                       setReplyingToId(null);
                       setReplyMessage("");
@@ -133,7 +140,7 @@ const Support = () => {
                   </button>
 
                   <button
-                    className="px-5 py-2 w-28 bg-green-600 text-white rounded-2xl hover:bg-green-700 transition-colors shadow-sm hover:shadow-md"
+                    className="px-5 py-2 w-28 bg-green-600 text-white rounded-2xl hover:bg-green-700 transition-colors shadow-sm hover:shadow-md font-medium"
                     onClick={() => handleSendReply(card)}
                   >
                     Send
@@ -145,11 +152,11 @@ const Support = () => {
         ))}
       </div>
 
-      <div className="flex justify-center mt-10 gap-4">
+      <div className="flex justify-center mt-12 gap-4 items-center">
         <button
-          onClick={prevPage}
+          onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
           disabled={currentPage === 1}
-          className="px-4 py-2 rounded-lg bg-gray-300 text-gray-700 hover:bg-gray-400 disabled:opacity-50"
+          className="px-5 py-2 rounded-xl font-medium bg-purple-100 text-purple-700 hover:bg-purple-200 disabled:bg-purple-50 disabled:text-purple-300 disabled:cursor-not-allowed shadow-sm"
         >
           Previous
         </button>
@@ -159,9 +166,9 @@ const Support = () => {
         </span>
 
         <button
-          onClick={nextPage}
+          onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
           disabled={currentPage === totalPages}
-          className="px-4 py-2 rounded-lg bg-gray-300 text-gray-700 hover:bg-gray-400 disabled:opacity-50"
+          className="px-5 py-2 rounded-xl font-medium bg-purple-100 text-purple-700 hover:bg-purple-200 disabled:bg-purple-50 disabled:text-purple-300 disabled:cursor-not-allowed shadow-sm"
         >
           Next
         </button>
